@@ -1,6 +1,5 @@
 import React from 'react';
-import Message from 'components/Message';
-import Featured from 'components/Featured';
+import TronPixel from 'components/TronPixel'
 import TronLinkGuide from 'components/TronLinkGuide';
 import TronWeb from 'tronweb';
 import Utils from 'utils';
@@ -13,21 +12,17 @@ const FOUNDATION_ADDRESS = 'TWiWt5SEDzaEqS6kE5gandWMNfxR2B5xzg';
 
 class App extends React.Component {
     state = {
-        currentMessage: {
-            message: '',
-            loading: false
-        },
-        messages: {
-            recent: ''
-        }
-
+        // currentMessage: {
+        //     message: '',
+        //     loading: false
+        // },
+        // messages: {
+        //     recent: ''
+        // }
     }
-    // message = '';
 
     constructor(props) {
         super(props);
-        this.onMessageEdit = this.onMessageEdit.bind(this);
-        this.onMessageSend = this.onMessageSend.bind(this);
     }
 
     async componentDidMount() {
@@ -107,87 +102,69 @@ class App extends React.Component {
 
         await Utils.setTronWeb(window.tronWeb);
 
-        this.getmessage();
+        // this.getmessage();
     }
 
-    async getmessage() {
-        console.log('aaaaaa');
-        await Utils.contract.get().call()
-        .then(respond => {
-            this.state.messages.recent = parseInt(respond._hex);
-        });
-    }
+    // async getmessage() {
+    //     console.log('aaaaaa');
+    //     await Utils.contract.get().call()
+    //     .then(respond => {
+    //         this.state.messages.recent = parseInt(respond._hex);
+    //     });
+    // }
 
-    async setmessage(param) {
-        await Utils.contract.set(param).send();
-    }
+    // async setmessage(param) {
+    //     await Utils.contract.set(param).send();
+    // }
 
-    async onMessageSend() {
-        const {
-            loading,
-            message
-        } = this.state.currentMessage;
+    // async onMessageSend() {
+    //     const {
+    //         loading,
+    //         message
+    //     } = this.state.currentMessage;
 
-        if(loading)
-            return;
+    //     if(loading)
+    //         return;
 
-        if(!message.trim().length)
-            return;
+    //     if(!message.trim().length)
+    //         return;
 
-        this.setState({
-            currentMessage: {
-                loading: true,
-                message
-            }
-        });
+    //     this.setState({
+    //         currentMessage: {
+    //             loading: true,
+    //             message
+    //         }
+    //     });
 
-        await Utils.contract.set(message).send()
-        .then(respond => {
-            this.getmessage();
-        });
-    }
+    //     await Utils.contract.set(message).send()
+    //     .then(respond => {
+    //         this.getmessage();
+    //     });
+    // }
 
-    handleSearchTermSubmit(event) {
-        event.preventDefault();
-        this.props.onSearchTermSubmit(this.textInput.value);
-    }
+    // handleSearchTermSubmit(event) {
+    //     event.preventDefault();
+    //     this.props.onSearchTermSubmit(this.textInput.value);
+    // }
 
-    onMessageEdit({ target: { value } }) {
-        if(this.state.currentMessage.loading)
-            return;
+    // onMessageEdit({ target: { value } }) {
+    //     if(this.state.currentMessage.loading)
+    //         return;
 
-        this.setState({
-            currentMessage: {
-                message: value,
-                loading: false
-            }
-        });
-        this.getmessage();
-     }
+    //     this.setState({
+    //         currentMessage: {
+    //             message: value,
+    //             loading: false
+    //         }
+    //     });
+    //     this.getmessage();
+    //  }
 
 
     render() {
         return (
-            <div className='kontainer'>
-                <div className='message'>
-                    <div>
-                      { this.state['messages']['recent'] }
-                    </div>
-                </div>
-
-                <div className='testaaa'>
-                    <textarea
-                        placeholder='Enter your message to post'
-                        value={ this.state.currentMessage.message }
-                        onChange={ this.onMessageEdit }></textarea>
-                </div>
-
-                <div
-                    className={ 'sendButton' + (!!this.state.currentMessage.message.trim().length ? '' : ' disabled') }
-                    onClick={ this.onMessageSend }
-                >
-                    Post Message
-                </div>                
+            <div>
+                <TronPixel />
             </div>
         );
     }
