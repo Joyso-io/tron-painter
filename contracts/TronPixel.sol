@@ -20,7 +20,6 @@ contract TronPixel {
   // The price increment rate used in the following formula:
   //   price = prevPrice + (prevPrice * incrementRate / 100);
   uint public incrementRate;
-
   // A record of a user who may at any time be an owner of pixels or simply has
   // unclaimed withdrawal from a failed purchase or a successful sale
   struct User {
@@ -117,6 +116,17 @@ contract TronPixel {
   //============================================================================
   // Public Querying API
   //============================================================================
+
+  function getPixelRowColors(uint16 row) view returns(uint16, uint24[]) {
+    uint24[] memory pixelList = new uint24[](size);
+    uint32 key;
+    for(uint16 col=1; col < size; col++) {
+      key = getKey(row, col);
+      pixelList[col] = pixels[key].color;
+    }
+
+    return (row, pixelList);
+  }
 
   function getPixelColor(uint16 row, uint16 col) constant returns (uint24) {
     uint32 key = getKey(row, col);
