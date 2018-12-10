@@ -1,0 +1,106 @@
+.controls {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #3d3d41;
+  padding: 0;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.colors {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  background: #3d3d41;
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+  transition: transform .3s ease-in-out;
+  transform: translateX(-50%) translateY(70px);
+  z-index: 0;
+
+  &.active {
+    transform: translateX(-50%) translateY(-53px);
+  }
+
+  li {
+    width: 20px;
+    height: 20px;
+    margin: 5px;
+    list-style: none;
+    cursor: pointer;
+  }
+}
+
+.color-0 {
+  background: #fff;
+}
+
+.color-1 {
+  background: #e4e4e4;
+}
+
+.color-2 {
+  background: #888;
+}
+
+.color-3 {
+  background: #222;
+}
+
+.color-4 {
+  background: #ffa7d1;
+}
+
+.color-5 {
+  background: #e50000;
+}
+
+.color-6 {
+  background: #e59500;
+}
+
+.color-7 {
+  background: #a06a42;
+}
+
+.color-8 {
+  background: #e5d900;
+}
+
+.color-9 {
+  background: #94e044;
+}
+
+.color-10 {
+  background: #02be01;
+}
+
+.color-11 {
+  background: #00d3dd;
+}
+
+.color-12 {
+  background: #0083c7;
+}
+
+.color-13 {
+  background: #0000ea;
+}
+
+.color-14 {
+  background: #cf6ee4;
+}
+
+.color-15 {
+  background: #820080;
+}

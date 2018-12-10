@@ -15,7 +15,6 @@ const Canvas = props => {
 
 
     return (
-
         <canvas id="theCanvas" width="800" height="800"></canvas>
     );
 };
