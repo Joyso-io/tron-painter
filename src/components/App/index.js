@@ -23,6 +23,7 @@ class App extends React.Component {
         color: [],
         pixelPrices: [],
         currentColor: null,
+        pendingWithdrawal: 0,
         colors: {
             0: '#fff',
             1: '#e4e4e4',
@@ -48,6 +49,7 @@ class App extends React.Component {
         this.sum = this.sum.bind(this);
         this.getPixelColors = this.getPixelColors.bind(this);
         this.getAllIndexes = this.getAllIndexes.bind(this);
+        this.checkPendingWithdrawal = this.checkPendingWithdrawal.bind(this);
         this.draw = this.draw.bind(this);
         this.updateSelectColor = this.updateSelectColor.bind(this);
         this.drawPixel = this.drawPixel.bind(this);
@@ -134,6 +136,7 @@ class App extends React.Component {
 
         this.draw();
         this.drawPixel();
+        this.checkPendingWithdrawal();
     }
 
     draw() {
@@ -219,6 +222,15 @@ class App extends React.Component {
         await Utils.contract.buyPixels(this.state.row, this.state.col, this.state.color).send({ callValue: Utils.contract.tronWeb.toSun(total_price) });
     }
 
+    async checkPendingWithdrawal() {
+        let respond = await Utils.contract.checkPendingWithdrawal().call();
+        await this.setState({ pendingWithdrawal: (parseInt(respond._hex, 16) / 1000000) })
+    }
+
+    async withdraw() {
+        await Utils.contract.withdraw().send();
+    }
+
     sum(arr) {
       return arr.reduce((sum, x) => sum + x);
     }
@@ -237,7 +249,9 @@ class App extends React.Component {
                 <div className='landing-wrapper'>
                     <Canvas />
                 </div>
-                <Controls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } updateColor={ this.updateSelectColor } buyPixels= { this.buyPixels } />
+                <Controls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } updateColor={ this.updateSelectColor } buyPixels= { this.buyPixels } pendingWithdrawal={ this.state.pendingWithdrawal }
+                    withdraw={ this.withdraw }
+                />
             </div>
         );
     }

@@ -1,5 +1,6 @@
 import React from 'react';
 import Cart from 'components/Cart';
+import Withdraw from 'components/Withdraw';
 
 import { Scrollbars } from 'react-custom-scrollbars';
 
@@ -14,7 +15,7 @@ class Controls extends React.Component {
         super(props);
         this.showColors = this.showColors.bind(this);
         this.selectColor = this.selectColor.bind(this);
-        this.openCart = this.openCart.bind(this);
+        this.toggle = this.toggle.bind(this);
         this.buy = this.buy.bind(this);
     }
 
@@ -29,10 +30,11 @@ class Controls extends React.Component {
         this.showColors();
     }
 
-    openCart() {
-        let cart = document.querySelector('#cart');
-        console.log(this.props)
-        cart.classList.toggle('is-visible');
+    toggle(e) {
+        let name = e.target.className;
+        let element = document.querySelector("#" + name);
+
+        element.classList.toggle('is-visible');
     }
 
     buy() {
@@ -59,11 +61,16 @@ class Controls extends React.Component {
                         { colorItems }
                     </ul>
 
-                    <button onClick={this.openCart}>
+                    <button className="cart" onClick={ this.toggle }>
                         Cart
                     </button>
 
+                    <button className="myModal" onClick={ this.toggle }>
+                        Withdraw
+                    </button>
+
                     <Cart row={ this.props.row } col={ this.props.col } color={ this.props.color } pixelPrices={ this.props.pixelPrices } buy={ this.buy }/>
+                    <Withdraw toggle={ this.toggle } pendingWithdrawal={ this.props.pendingWithdrawal } withdraw={ this.props.withdraw }/>
                 </div>
             </div>
         );
