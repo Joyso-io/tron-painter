@@ -48,6 +48,8 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         this.sum = this.sum.bind(this);
+        this.windowToCanvas = this.windowToCanvas.bind(this);
+        this.pathExists = this.pathExists.bind(this);
         this.getPixelColors = this.getPixelColors.bind(this);
         this.getAllIndexes = this.getAllIndexes.bind(this);
         this.checkPendingWithdrawal = this.checkPendingWithdrawal.bind(this);
@@ -152,16 +154,6 @@ class App extends React.Component {
             let rect = theCanvas.getBoundingClientRect();
 
             this.getPixelColors(canvas, rect);
-
-            theCanvas.onclick = (e) => {
-                if (this.state.currentColor) {
-                    this.setState({ row: (Math.floor((e.offsetX) * 100 / rect.width)) });
-                    this.setState({ col: (Math.floor((e.offsetY) * 100 / rect.height)) });
-                    let row = Math.floor((e.offsetX) * 100 / rect.width);
-                    let col = Math.floor((e.offsetY) * 100 / rect.height);
-                    this.drawPixels(canvas, rect, row, col);
-                }
-            }
         }
 
     };
@@ -189,22 +181,44 @@ class App extends React.Component {
         let canvas = theCanvas.getContext('2d');
         canvas.clearRect(0, 0, canvas.width, canvas.height);
         let rect = theCanvas.getBoundingClientRect();
+        let isAllowDrawLine = false
 
-        theCanvas.onclick = (e) => {
+        theCanvas.onmousedown = (e) => {
+            const rowArray = []
+            const colArray = []
             if (this.state.currentColor) {
-                let row = Math.floor((e.offsetX) * 100 / rect.width);
-                let col = Math.floor((e.offsetY) * 100 / rect.height);
+                isAllowDrawLine = true
+                let { row, col } = this.windowToCanvas(theCanvas, e, rect)
                 let colorInt = Object.keys(this.state.colors).find(key => this.state.colors[key] === this.state.currentColor);
-
+                rowArray.push(row);
+                colArray.push(col);
                 this.updatePixelState(row, col, colorInt, canvas, rect);
+                theCanvas.onmousemove = (e) => {
+                    const { row, col } = this.windowToCanvas(theCanvas, e, rect)
+                    let intersection = this.pathExists(row, col, rowArray, colArray);
+
+                    if (isAllowDrawLine && intersection < 1) {
+                        rowArray.push(row);
+                        colArray.push(col);
+                        this.updatePixelState(row, col, colorInt, canvas, rect);
+                    }
+                }
             }
+        }
+        theCanvas.onmouseup = function() {
+            isAllowDrawLine = false
+        }
+    }
+
+    windowToCanvas(canvas, e, rect) {
+        return {
+            row: Math.floor((e.offsetX) * 100 / rect.width),
+            col: Math.floor((e.offsetY) * 100 / rect.height)
         }
     }
 
     async updatePixelState(row, col, colorInt, canvas, rect) {
-        let rowIndex = new Set(this.getAllIndexes(this.state.row, row));
-        let colIndex = new Set(this.getAllIndexes(this.state.col, col));
-        let intersection =  Array.from(new Set([...rowIndex].filter(x => colIndex.has(x))));
+        let intersection = this.pathExists(row, col, this.state.row, this.state.col);
 
         if (intersection.length > 0) {
             this.state.color[intersection[0]] = colorInt;
@@ -223,6 +237,14 @@ class App extends React.Component {
             canvas.fillStyle = this.state.currentColor;
             canvas.fillRect(row * rect.width / 100, col * rect.height / 100, rect.width / 100, rect.width / 100);
         }
+    }
+
+    pathExists(row, col, rowArray, colArray) {
+        let rowIndex = new Set(this.getAllIndexes(rowArray, row));
+        let colIndex = new Set(this.getAllIndexes(colArray, col));
+        let intersection =  Array.from(new Set([...rowIndex].filter(x => colIndex.has(x))));
+
+        return intersection
     }
 
     async buyPixels() {
