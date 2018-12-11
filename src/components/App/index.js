@@ -24,6 +24,7 @@ class App extends React.Component {
         pixelPrices: [],
         currentColor: null,
         pendingWithdrawal: 0,
+        isMaxCount: false,
         colors: {
             0: '#fff',
             1: '#e4e4e4',
@@ -195,26 +196,32 @@ class App extends React.Component {
                 let col = Math.floor((e.offsetY) * 100 / rect.height);
                 let colorInt = Object.keys(this.state.colors).find(key => this.state.colors[key] === this.state.currentColor);
 
-                canvas.fillStyle = this.state.currentColor;
-                canvas.fillRect(row * rect.width / 100, col * rect.height / 100, rect.width / 100, rect.width / 100);
-                this.updatePixelState(row, col, colorInt);
+                this.updatePixelState(row, col, colorInt, canvas, rect);
             }
         }
     }
 
-    async updatePixelState(row, col, colorInt) {
+    async updatePixelState(row, col, colorInt, canvas, rect) {
         let rowIndex = new Set(this.getAllIndexes(this.state.row, row));
         let colIndex = new Set(this.getAllIndexes(this.state.col, col));
         let intersection =  Array.from(new Set([...rowIndex].filter(x => colIndex.has(x))));
-        
+
         if (intersection.length > 0) {
             this.state.color[intersection[0]] = colorInt;
             this.setState({ color: this.state.color });
-        } else {
+
+            canvas.fillStyle = this.state.currentColor;
+            canvas.fillRect(row * rect.width / 100, col * rect.height / 100, rect.width / 100, rect.width / 100);
+        } else if(!this.state.isMaxCount) {
             let getPixelPrice = await Utils.contract.getPixelPrice(row, col).call();
             let pixelTrx = getPixelPrice / 1000000;
 
             await this.setState({ row: this.state.row.concat(row), col: this.state.col.concat(col), color: this.state.color.concat(colorInt), pixelPrices: this.state.pixelPrices.concat(pixelTrx) });
+            if (this.state.row.length > 99)
+                this.setState({ isMaxCount: true })
+
+            canvas.fillStyle = this.state.currentColor;
+            canvas.fillRect(row * rect.width / 100, col * rect.height / 100, rect.width / 100, rect.width / 100);
         }
     }
 
