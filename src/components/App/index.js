@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 
 import './App.scss';
 
-const FOUNDATION_ADDRESS = 'TWiWt5SEDzaEqS6kE5gandWMNfxR2B5xzg';
+const FOUNDATION_ADDRESS = 'TFSiTozdHoj5J9EgNqXCXXLg4mhwnWSopS';
 
 class App extends React.Component {
     state = {
@@ -119,7 +119,9 @@ class App extends React.Component {
                 base58: FOUNDATION_ADDRESS
             };
 
-            window.tronWeb.on('addressChanged', () => {
+            window.tronWeb.on('addressChanged', async() => {
+                await Utils.setTronWeb(window.tronWeb);
+                this.checkPendingWithdrawal();
                 if(this.state.tronWeb.loggedIn)
                     return;
 
@@ -211,7 +213,7 @@ class App extends React.Component {
         } else {
             let getPixelPrice = await Utils.contract.getPixelPrice(row, col).call();
             let pixelTrx = getPixelPrice / 1000000;
-            let pixelPrice = parseInt(getPixelPrice._hex, 16);
+
             await this.setState({ row: this.state.row.concat(row), col: this.state.col.concat(col), color: this.state.color.concat(colorInt), pixelPrices: this.state.pixelPrices.concat(pixelTrx) });
         }
     }

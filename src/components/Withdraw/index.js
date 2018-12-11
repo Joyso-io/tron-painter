@@ -19,7 +19,7 @@ class Withdraw extends React.Component {
                     </div>
 
                     <div className="content">
-                        <div class="withdraw-price">
+                        <div className="withdraw-price">
                             Total Revenue: {this.props.pendingWithdrawal}
                         </div>
                         <button className="withdraw" onClick={ this.props.withdraw }>Withdraw</button>
