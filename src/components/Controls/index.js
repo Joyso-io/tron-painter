@@ -69,7 +69,7 @@ class Controls extends React.Component {
                         Withdraw
                     </button>
 
-                    <Cart row={ this.props.row } col={ this.props.col } color={ this.props.color } pixelPrices={ this.props.pixelPrices } buy={ this.buy }/>
+                    <Cart row={ this.props.row } col={ this.props.col } color={ this.props.color } pixelPrices={ this.props.pixelPrices } buy={ this.buy } clear={ this.props.clear } />
                     <Withdraw toggle={ this.toggle } pendingWithdrawal={ this.props.pendingWithdrawal } withdraw={ this.props.withdraw }/>
                 </div>
             </div>

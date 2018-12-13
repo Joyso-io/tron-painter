@@ -33,6 +33,10 @@ class Cart extends React.Component {
                 <button className={ 'buy-button '.concat((col.length == 0) ? 'disable' : '') } onClick={ this.props.buy }>
                     buy
                 </button>
+
+                <button className='clear' onClick={ this.props.clear }>
+                    clear
+                </button>
                 <div className='pixelItems'>
                     { pixelItems }
                 </div>

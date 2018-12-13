@@ -25,6 +25,7 @@ class App extends React.Component {
         currentColor: null,
         pendingWithdrawal: 0,
         isMaxCount: false,
+        selectPixels: [],
         colors: {
             0: '#fff',
             1: '#e4e4e4',
@@ -48,6 +49,7 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         this.sum = this.sum.bind(this);
+        this.clear = this.clear.bind(this);
         this.windowToCanvas = this.windowToCanvas.bind(this);
         this.pathExists = this.pathExists.bind(this);
         this.getPixelColors = this.getPixelColors.bind(this);
@@ -190,14 +192,12 @@ class App extends React.Component {
                 isAllowDrawLine = true
                 let { row, col } = this.windowToCanvas(theCanvas, e, rect)
                 let colorInt = Object.keys(this.state.colors).find(key => this.state.colors[key] === this.state.currentColor);
-                rowArray.push(row);
-                colArray.push(col);
-                this.updatePixelState(row, col, colorInt, canvas, rect);
-                theCanvas.onmousemove = (e) => {
+                let rowInt = row;
+                let colInt = col;
+                theCanvas.onmousemove = async (e) => {
                     const { row, col } = this.windowToCanvas(theCanvas, e, rect)
                     let intersection = this.pathExists(row, col, rowArray, colArray);
-
-                    if (isAllowDrawLine && intersection < 1) {
+                    if (isAllowDrawLine && intersection < 1 && !(rowInt === row && colInt === col)) {
                         rowArray.push(row);
                         colArray.push(col);
                         this.updatePixelState(row, col, colorInt, canvas, rect);
@@ -205,8 +205,11 @@ class App extends React.Component {
                 }
             }
         }
-        theCanvas.onmouseup = function() {
+        theCanvas.onmouseup = async (e) => {
             isAllowDrawLine = false
+            let selectPixelPrices = await Utils.contract.getPixelPrices(this.state.row, this.state.col).call();
+            let pixelPrices = selectPixelPrices.map(function(item) { return (parseInt(item._hex, 16) / 1000000) });
+            this.setState({ pixelPrices: pixelPrices });
         }
     }
 
@@ -217,7 +220,7 @@ class App extends React.Component {
         }
     }
 
-    async updatePixelState(row, col, colorInt, canvas, rect) {
+    updatePixelState(row, col, colorInt, canvas, rect) {
         let intersection = this.pathExists(row, col, this.state.row, this.state.col);
 
         if (intersection.length > 0) {
@@ -227,10 +230,11 @@ class App extends React.Component {
             canvas.fillStyle = this.state.currentColor;
             canvas.fillRect(row * rect.width / 100, col * rect.height / 100, rect.width / 100, rect.width / 100);
         } else if(!this.state.isMaxCount) {
-            let getPixelPrice = await Utils.contract.getPixelPrice(row, col).call();
-            let pixelTrx = getPixelPrice / 1000000;
+            this.setState({ 
+                row: this.state.row.concat(row), col: this.state.col.concat(col), color: this.state.color.concat(colorInt),
+                selectPixels: this.state.selectPixels.concat({ row: row, col: col })
+            });
 
-            await this.setState({ row: this.state.row.concat(row), col: this.state.col.concat(col), color: this.state.color.concat(colorInt), pixelPrices: this.state.pixelPrices.concat(pixelTrx) });
             if (this.state.row.length > 99)
                 this.setState({ isMaxCount: true })
 
@@ -247,15 +251,45 @@ class App extends React.Component {
         return intersection
     }
 
+
+
     async buyPixels() {
         let total_price = this.state.pixelPrices.reduce((sum, x) => sum + x).toFixed(2);
 
         await Utils.contract.buyPixels(this.state.row, this.state.col, this.state.color).send({ callValue: Utils.contract.tronWeb.toSun(total_price) });
+        await this.clear();
     }
 
     async checkPendingWithdrawal() {
         let respond = await Utils.contract.checkPendingWithdrawal().call();
         await this.setState({ pendingWithdrawal: (parseInt(respond._hex, 16) / 1000000) })
+    }
+
+    async clear() {
+        let theCanvas = document.querySelector('#theCanvas');
+        let canvas = theCanvas.getContext('2d');
+        canvas.clearRect(0, 0, canvas.width, canvas.height);
+        let rect = theCanvas.getBoundingClientRect();
+
+        let rows = new Array();
+        let cols = new Array();
+
+        for (let index in this.state.selectPixels) {
+            rows.push(this.state.selectPixels[index].row);
+            cols.push(this.state.selectPixels[index].col);
+        }
+
+        await Utils.contract.getPixelColors(rows, cols).call()
+                    .then(color => {
+                        for (var i = 0; i < this.state.selectPixels.length; i++) {
+                            canvas.fillStyle = this.state.colors[color[i]];
+                            canvas.fillRect(this.state.selectPixels[i].row * rect.width / 100, this.state.selectPixels[i].col * rect.height / 100, rect.width / 100, rect.width / 100);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                    })
+
+        this.setState({ row: [], col: [], color: [], pixelPrices: [], selectPixels: [], isMaxCount: false })
     }
 
     async withdraw() {
@@ -281,7 +315,7 @@ class App extends React.Component {
                     <Canvas />
                 </div>
                 <Controls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } updateColor={ this.updateSelectColor } buyPixels= { this.buyPixels } pendingWithdrawal={ this.state.pendingWithdrawal }
-                    withdraw={ this.withdraw }
+                    withdraw={ this.withdraw } clear={ this.clear }
                 />
             </div>
         );
