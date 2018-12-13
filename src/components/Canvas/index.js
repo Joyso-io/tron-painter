@@ -5,15 +5,6 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import './Canvas.scss';
 
 const Canvas = props => {
-    // const {
-    //     recent,
-    //     featured,
-    //     currentAddress,
-    //     tronLinkInstalled,
-    //     onTip
-    // } = props;
-
-
     return (
         <canvas id="theCanvas" width="800" height="800"></canvas>
     );

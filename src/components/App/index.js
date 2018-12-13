@@ -2,6 +2,7 @@ import React from 'react';
 import TronLinkGuide from 'components/TronLinkGuide';
 import TronWeb from 'tronweb';
 // import TronPixel from 'components/TronPixel'
+import Header from 'components/Header';
 import Canvas from 'components/Canvas';
 import Controls from 'components/Controls';
 import Utils from 'utils';
@@ -311,7 +312,8 @@ class App extends React.Component {
     render() {
         return (
             <div>
-                <div className='landing-wrapper'>
+                <Header /> 
+                <div id='pixel-canvas'>
                     <Canvas />
                 </div>
                 <Controls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } updateColor={ this.updateSelectColor } buyPixels= { this.buyPixels } pendingWithdrawal={ this.state.pendingWithdrawal }

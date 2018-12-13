@@ -35,7 +35,8 @@
 
   .pixelItems {
     overflow-y: scroll;
-    height: calc(100% - 180px);
+    // height: calc(100% - 180px);
+    height: calc(100% - 220px);
 
     .pixel {
       padding: 5px 20px;
