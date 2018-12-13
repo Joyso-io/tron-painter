@@ -120,12 +120,25 @@ contract TronPixel {
   function getPixelRowColors(uint16 row) view returns(uint16, uint24[]) {
     uint24[] memory pixelList = new uint24[](size);
     uint32 key;
-    for(uint16 col=1; col < size; col++) {
+    for(uint16 col=0; col < size; col++) {
       key = getKey(row, col);
       pixelList[col] = pixels[key].color;
     }
 
     return (row, pixelList);
+  }
+
+  function getPixelColors(uint16[] row, uint16[] col) view returns(uint24[]) {
+    uint pLength = row.length;
+    require(pLength == col.length);
+    uint24[] memory pixelList = new uint24[](pLength);
+    uint32 key;
+    for(uint16 i=0; i < pLength; i++) {
+      key = getKey(row[i], col[i]);
+      pixelList[i] = pixels[key].color;
+    }
+
+    return pixelList;
   }
 
   function getPixelColor(uint16 row, uint16 col) constant returns (uint24) {
@@ -139,6 +152,18 @@ contract TronPixel {
       return admin;
     }
     return pixels[key].owner;
+  }
+
+  function getPixelPrices(uint16[] row, uint16[] col) constant returns (uint[]) {
+    uint pLength = row.length;
+    require(pLength == col.length);
+    
+    uint[] memory pixelPrices = new uint[](pLength);
+    for(uint16 i=0; i < pLength; i++) {
+      pixelPrices[i] = getPixelPrice(row[i],col[i]);
+    }
+
+    return pixelPrices;
   }
 
   function getPixelPrice(uint16 row, uint16 col) constant returns (uint) {
