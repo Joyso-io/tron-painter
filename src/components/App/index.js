@@ -195,6 +195,7 @@ class App extends React.Component {
                 let colorInt = Object.keys(this.state.colors).find(key => this.state.colors[key] === this.state.currentColor);
                 let rowInt = row;
                 let colInt = col;
+                this.updatePixelState(row, col, colorInt, canvas, rect);
                 theCanvas.onmousemove = async (e) => {
                     const { row, col } = this.windowToCanvas(theCanvas, e, rect)
                     let intersection = this.pathExists(row, col, rowArray, colArray);

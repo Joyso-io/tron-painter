@@ -7,7 +7,7 @@ import './Header.scss';
 const Header = props => {
     return (
       <header>
-        <h1>test</h1>
+        <h1>Pixel</h1>
       </header>
     );
 };
