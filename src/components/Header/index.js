@@ -7,7 +7,15 @@ import './Header.scss';
 const Header = props => {
     return (
       <header>
-        <h1>Pixel</h1>
+        <div className="group-2">
+          <div className="path-0">
+            <div className="path-1">
+            </div>
+          </div>
+          <div className="pixel-painter">
+            Pixel Painter
+          </div>
+        </div>
       </header>
     );
 };

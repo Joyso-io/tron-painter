@@ -4,7 +4,8 @@ import TronWeb from 'tronweb';
 // import TronPixel from 'components/TronPixel'
 import Header from 'components/Header';
 import Canvas from 'components/Canvas';
-import Controls from 'components/Controls';
+import LeftControls from 'components/LeftControls';
+import RightControls from 'components/RightControls';
 import Utils from 'utils';
 import Swal from 'sweetalert2';
 // import banner from 'assets/banner.png';
@@ -24,6 +25,7 @@ class App extends React.Component {
         color: [],
         pixelPrices: [],
         currentColor: null,
+        userTotalSales: 0,
         pendingWithdrawal: 0,
         isMaxCount: false,
         selectPixels: [],
@@ -51,11 +53,13 @@ class App extends React.Component {
         super(props);
         this.sum = this.sum.bind(this);
         this.clear = this.clear.bind(this);
+        this.toggle = this.toggle.bind(this);
         this.windowToCanvas = this.windowToCanvas.bind(this);
         this.pathExists = this.pathExists.bind(this);
         this.getPixelColors = this.getPixelColors.bind(this);
         this.getAllIndexes = this.getAllIndexes.bind(this);
         this.checkPendingWithdrawal = this.checkPendingWithdrawal.bind(this);
+        this.userTotalSales = this.userTotalSales.bind(this);
         this.draw = this.draw.bind(this);
         this.updateSelectColor = this.updateSelectColor.bind(this);
         this.drawPixel = this.drawPixel.bind(this);
@@ -128,13 +132,15 @@ class App extends React.Component {
             window.tronWeb.on('addressChanged', async() => {
                 await Utils.setTronWeb(window.tronWeb);
                 this.checkPendingWithdrawal();
+                this.userTotalSales(window.tronWeb.defaultAddress.hex);
                 if(this.state.tronWeb.loggedIn)
                     return;
 
                 this.setState({
                     tronWeb: {
                         installed: true,
-                        loggedIn: true
+                        loggedIn: true,
+                        address: window.tronWeb.defaultAddress.hex
                     }
                 });
             });
@@ -144,6 +150,7 @@ class App extends React.Component {
 
         this.draw();
         this.drawPixel();
+        this.userTotalSales(window.tronWeb.defaultAddress.hex);
         this.checkPendingWithdrawal();
     }
 
@@ -267,6 +274,11 @@ class App extends React.Component {
         await this.setState({ pendingWithdrawal: (parseInt(respond._hex, 16) / 1000000) })
     }
 
+    async userTotalSales(address) {
+        let respond = await Utils.contract.getUserTotalSales(address).call();
+        await this.setState({ userTotalSales: (parseInt(respond._hex, 16) / 1000000) })
+    }
+
     async clear() {
         let theCanvas = document.querySelector('#theCanvas');
         let canvas = theCanvas.getContext('2d');
@@ -310,16 +322,27 @@ class App extends React.Component {
         return indexes;
     }
 
+    toggle(e) {
+        let name = e.target.className;
+        let element = document.querySelector("#" + name);
+
+        element.classList.toggle('is-visible');
+    }
+
     render() {
         return (
             <div>
-                <Header /> 
+                <Header />
                 <div id='pixel-canvas'>
+                    <div className='controls-content left-controls'>
+                        <LeftControls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } updateColor={ this.updateSelectColor } clear={ this.clear } />
+                    </div>
                     <Canvas />
+                    <div className='controls-content right-controls'>
+                        <RightControls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } 
+                                       buyPixels= { this.buyPixels } userTotalSales={ this.state.userTotalSales } pendingWithdrawal={ this.state.pendingWithdrawal } withdraw={ this.withdraw } toggle={ this.toggle } clear={ this.clear } />
+                    </div>
                 </div>
-                <Controls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } updateColor={ this.updateSelectColor } buyPixels= { this.buyPixels } pendingWithdrawal={ this.state.pendingWithdrawal }
-                    withdraw={ this.withdraw } clear={ this.clear }
-                />
             </div>
         );
     }

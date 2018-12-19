@@ -1,0 +1,31 @@
+.controls-content.right-controls {
+ margin-left: 15px;
+}
+
+.controls-content {
+  .controls {
+    .tools {
+      > a {
+        &.wallet {
+          background-image: url('/images/wallet.svg');
+          background-position: 15px 14.5px;
+        }
+
+        &.ranking-btn {
+          background-image: url('/images/ranking.svg');
+          background-position: 16px 14.5px;
+        }
+
+        &.cart {
+          background-image: url('/images/cart.svg');
+          background-position: 12.5px 14.5px;
+        }
+
+        &.income {
+          background-image: url('/images/income.svg');
+          background-position: 15px 14px;
+        }
+      }
+    }
+  }
+}

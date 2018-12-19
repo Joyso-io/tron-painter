@@ -1,0 +1,75 @@
+#wallet {
+  position: absolute;
+  top: 0;
+  // height: 107px;
+  width: 180px;
+  background-color: #2B2B2B;
+  z-index: -1;
+  transition: transform .3s ease-in-out;
+  transform: translateX(-130px);
+  padding: 15px;
+  font-size: 12px;
+
+  &.is-visible {
+    z-index: 100;
+    transform: translateX(-188px) translateZ(100px);
+  }
+
+
+  .log-in {
+    height: 34px;
+    width: 122px;
+    color: #DADADA;
+    font-family: "PingFang TC";
+    margin-bottom: 11px;
+  }
+
+  .tronlink {
+    height: 17px;
+    width: 52px;
+    color: #DADADA;
+    font-family: "PingFang TC";
+    font-size: 12px;
+  }
+
+  .tronlink-url {
+    height: 16px;
+    width: 129px;
+    color: #FA2A45;
+    font-family: Roboto;
+    font-size: 12px;
+  }
+
+  .user-address {
+    height: 17px;
+    width: 149px; color: #FA2A45;
+    font-family: "PingFang TC";
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .balance {
+    overflow: hidden;
+    height: 19px;
+
+    .title {
+      float: left;
+      width: 47px;
+      color: #DADADA;
+      font-family: "Helvetica Neue";
+      font-size: 12px;
+      line-height: 19px;
+    }
+
+    .user-balance {
+      float: right;
+      width: 49px;
+      color: #DADADA;
+      font-family: "Helvetica Neue";
+      font-size: 16px;
+      font-weight: bold;
+      line-height: 19px;
+    }
+  }
+}

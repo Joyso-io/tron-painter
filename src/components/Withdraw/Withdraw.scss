@@ -1,40 +1,52 @@
-#myModal {
-  display: none;
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1000;
-  display: none;
-  background: rgba(0,0,0,0.3);
+#income {
+  width: 200px;
+  background-color: #2B2B2B;
+  position: absolute;
+  top: 150px;
+  color: #DADADA;
+  padding: 15px 8px;
+  transition: transform .3s ease-in-out;
+  transform: translateX(-130px);
+  z-index: -1;
 
   &.is-visible {
-    display: block;
+    z-index: 100;
+    transform: translateX(-208px);
   }
 
-  #withdraw {
-    transform: translate(calc(50vw - 300px), 25vh);
-    width: 600px;
-    height: 50vh;
-    background: #fff;
+  .information {
+    margin-bottom: 10px;
 
-    .header {
-      padding: 10px;
+    .withdraw-content {
+      margin-bottom: 3px;
       overflow: hidden;
+      color: #DADADA;
+      font-family: "Helvetica Neue";
+      font-weight: bold;
+      font-size: 13px;
 
-      .myModal {
+      .title {
+        float: left;
+        font-size: 13px;
+      }
+
+      .content {
         float: right;
+        font-size: 11px;
       }
     }
+  }
 
-    .content {
-      display: flex;
-      justify-content: space-between;
-
-      > * {
-        margin: 20px;
-      }
-    }
+  .withdraw-btn {
+    height: 18px;
+    width: 80px;
+    border-radius: 9px;
+    border: 0;
+    background-color: #FA2A45;
+    margin: 0 auto;
+    display: block;
+    color: #FFFFFF;
+    font-family: "Helvetica Neue";
+    font-size: 11px;
   }
 }

@@ -1,12 +1,10 @@
 import React from 'react';
-import Cart from 'components/Cart';
-import Withdraw from 'components/Withdraw';
 
 import { Scrollbars } from 'react-custom-scrollbars';
 
-import './Controls.scss';
+import './LeftControls.scss';
 
-class Controls extends React.Component {
+class LeftControls extends React.Component {
     state = {
        colorsActive: false
     }
@@ -15,7 +13,6 @@ class Controls extends React.Component {
         super(props);
         this.showColors = this.showColors.bind(this);
         this.selectColor = this.selectColor.bind(this);
-        this.toggle = this.toggle.bind(this);
         this.buy = this.buy.bind(this);
     }
 
@@ -28,13 +25,6 @@ class Controls extends React.Component {
         let color = element.getAttribute('color');
         this.props.updateColor(color);
         this.showColors();
-    }
-
-    toggle(e) {
-        let name = e.target.className;
-        let element = document.querySelector("#" + name);
-
-        element.classList.toggle('is-visible');
     }
 
     buy() {
@@ -53,28 +43,31 @@ class Controls extends React.Component {
         return (
             <div className="controls">
                 <div className="tools">
-                    <button onClick={this.showColors}>
-                        Button
-                    </button>
+                    <a className="colors-btn" onClick={this.showColors}>
+                    </a>
+
+                    <a className="eraser-btn">
+                    </a>
+
+                    <a className="return-btn">
+                    </a>
+
+                    <a className="move-btn">
+                    </a>
+
+                    <a className="snapshot-btn">
+                    </a>
+
+                    <a className="trash-btn" onClick={ this.props.clear }>
+                    </a>
 
                     <ul className={btn_class}>
                         { colorItems }
                     </ul>
-
-                    <button className="cart" onClick={ this.toggle }>
-                        Cart
-                    </button>
-
-                    <button className="myModal" onClick={ this.toggle }>
-                        Withdraw
-                    </button>
-
-                    <Cart row={ this.props.row } col={ this.props.col } color={ this.props.color } pixelPrices={ this.props.pixelPrices } buy={ this.buy } clear={ this.props.clear } />
-                    <Withdraw toggle={ this.toggle } pendingWithdrawal={ this.props.pendingWithdrawal } withdraw={ this.props.withdraw }/>
                 </div>
             </div>
         );
     }
 };
 
-export default Controls;
+export default LeftControls;

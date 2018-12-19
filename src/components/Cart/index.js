@@ -15,10 +15,10 @@ class Cart extends React.Component {
         let pixelPrices = this.props.pixelPrices;
         const pixelItems = this.props.row.map(function(item, index, array){
             return (
-                <div className='pixel' key={ index }> 
-                    <span className='coordinate'>{ item }, { col[index] }</span>
-                    <span className={'color color-'.concat(color[index])}></span>
-                    <span className='float-right'>{ pixelPrices[index] } Trx</span>
+                <div className='pixel' key={ index }>
+                    <div className={'color color-'.concat(color[index])}></div>
+                    <div className='coordinate'>{ (item < 10) ? ("0" + item) : item }, { (col[index] < 10) ? ("0" + col[index]) : col[index] }</div>
+                    <div className='pixel-price'>{ pixelPrices[index] }</div>
                 </div>
             );
         });
@@ -26,19 +26,45 @@ class Cart extends React.Component {
 
         return (
             <div id="cart">
-                <div className="title">
-                    購買明細
-                </div>
-                <div className='totalPrice'>{ totalPrice } Trx</div>
-                <button className={ 'buy-button '.concat((col.length == 0) ? 'disable' : '') } onClick={ this.props.buy }>
-                    buy
-                </button>
+                <div className="pixels-information">
+                    <div className="pixel-count pixels">
+                        <div className="title">
+                            Pixel
+                        </div>
+                        <div className="content">
+                            { pixelPrices.length }
+                        </div>
+                    </div>
+                    <div className='total-price pixels'>
+                        <div className="title">
+                            Tatal(TRX)
+                        </div>
+                        <div className="content">
+                            { totalPrice }
+                        </div>
+                    </div>
+                    <div className='pixel-controls pixels'>
+                        <a className='clear' onClick={ this.props.clear }></a>
 
-                <button className='clear' onClick={ this.props.clear }>
-                    clear
-                </button>
-                <div className='pixelItems'>
-                    { pixelItems }
+                        <button className={ 'buy '.concat((col.length == 0) ? 'disable' : '') } onClick={ this.props.buy }>
+                            Buy
+                        </button>
+                    </div>
+                </div>
+
+                <div className='pixel-items'>
+                    <div className="pixel-title pixels">
+                        <div className="title">
+                            Pixel
+                        </div>
+                        <div className="content">
+                            Price(TRX)
+                        </div>
+                    </div>
+
+                    <div className="pixels-content">
+                        { pixelItems }
+                    </div>
                 </div>
             </div>
         );
