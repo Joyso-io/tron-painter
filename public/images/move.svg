@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 52.5 (67469) - http://www.bohemiancoding.com/sketch -->
+    <title>6B6FE7CF-4126-4164-AABF-501435AAF47B</title>
+    <desc>Created with sketchtool.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="pixel-painter" transform="translate(-221.000000, -243.000000)" fill-rule="nonzero" stroke="#DADADA">
+            <g id="Group-5" transform="translate(222.000000, 244.000000)">
+                <g id="Group-4" transform="translate(6.000000, 0.000000)">
+                    <g id="Group-3" transform="translate(3.000000, 9.000000) rotate(90.000000) translate(-3.000000, -9.000000) translate(-6.000000, 6.480000)">
+                        <rect id="Rectangle" x="0.959677419" y="2.228" width="15.3306452" height="1" rx="0.5"></rect>
+                        <polyline id="Path-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 5.69046512e-14 17.6621695 2.44595581 15 4.78490241"></polyline>
+                        <polyline id="Path-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(1.331085, 2.392451) scale(-1, 1) translate(-1.331085, -2.392451) " points="1.13686838e-13 2.84217094e-14 2.66216953 2.44595581 1.13686838e-13 4.78490241"></polyline>
+                    </g>
+                </g>
+                <g id="Group-4" transform="translate(9.000000, 8.640000) rotate(90.000000) translate(-9.000000, -8.640000) translate(6.000000, 0.000000)">
+                    <g id="Group-3" transform="translate(3.000000, 8.640000) rotate(90.000000) translate(-3.000000, -8.640000) translate(-5.625000, 6.120000)">
+                        <rect id="Rectangle" x="0.959677419" y="2.228" width="15.3306452" height="1" rx="0.5"></rect>
+                        <polyline id="Path-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="14.25 0 16.9121695 2.44595581 14.25 4.78490241"></polyline>
+                        <polyline id="Path-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(1.331085, 2.392451) scale(-1, 1) translate(-1.331085, -2.392451) " points="9.9475983e-14 -5.68434189e-14 2.66216953 2.44595581 9.9475983e-14 4.78490241"></polyline>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
