@@ -6,13 +6,15 @@ import './LeftControls.scss';
 
 class LeftControls extends React.Component {
     state = {
-       colorsActive: false
+       colorsActive: false,
+       canvas: null
     }
 
     constructor(props) {
         super(props);
         this.showColors = this.showColors.bind(this);
         this.selectColor = this.selectColor.bind(this);
+        this.download = this.download.bind(this);
     }
 
     showColors() {
@@ -26,6 +28,14 @@ class LeftControls extends React.Component {
         this.showColors();
     }
 
+    download() {
+        const canvas = document.getElementById('theCanvas');
+        const context = canvas.getContext('2d');
+        const url = canvas.toDataURL();
+        const snapshot = document.querySelector('.snapshot');
+        snapshot.href = url;
+    }
+
     render() {
         const colorItems = Object.entries(this.props.colors).map(([key,value])=>{
             const className = 'color color-' + key;
@@ -33,6 +43,7 @@ class LeftControls extends React.Component {
                 <li key={ key } className={ className } color={ value } onClick={ (e) => this.selectColor(e) } ></li>
             );
         })
+        const save_url = this.save;
         let btn_class = this.state.colorsActive ? "active" : "";
 
         return (
@@ -50,7 +61,7 @@ class LeftControls extends React.Component {
                     <a className="move">
                     </a>
 
-                    <a className="snapshot">
+                    <a className="snapshot" href="#" download="PixelPainter.png" onClick={ this.download } >
                     </a>
 
                     <a className="trash" onClick={ this.props.clear }>
