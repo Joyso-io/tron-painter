@@ -56,6 +56,7 @@ class App extends React.Component {
         this.toggle = this.toggle.bind(this);
         this.windowToCanvas = this.windowToCanvas.bind(this);
         this.pathExists = this.pathExists.bind(this);
+        this.previous = this.previous.bind(this);
         this.getPixelColors = this.getPixelColors.bind(this);
         this.getAllIndexes = this.getAllIndexes.bind(this);
         this.checkPendingWithdrawal = this.checkPendingWithdrawal.bind(this);
@@ -279,7 +280,7 @@ class App extends React.Component {
         await this.setState({ userTotalSales: (parseInt(respond._hex, 16) / 1000000) })
     }
 
-    async clear() {
+    async clear(row = null, col = null, inputIndex = null) {
         let theCanvas = document.querySelector('#theCanvas');
         let canvas = theCanvas.getContext('2d');
         canvas.clearRect(0, 0, canvas.width, canvas.height);
@@ -288,12 +289,13 @@ class App extends React.Component {
         let rows = new Array();
         let cols = new Array();
 
-        for (let index in this.state.selectPixels) {
-            rows.push(this.state.selectPixels[index].row);
-            cols.push(this.state.selectPixels[index].col);
-        }
+        if (row === null || col == null || inputIndex == null) {
+            for (let index in this.state.selectPixels) {
+                rows.push(this.state.selectPixels[index].row);
+                cols.push(this.state.selectPixels[index].col);
+            }
 
-        await Utils.contract.getPixelColors(rows, cols).call()
+            await Utils.contract.getPixelColors(rows, cols).call()
                     .then(color => {
                         for (var i = 0; i < this.state.selectPixels.length; i++) {
                             canvas.fillStyle = this.state.colors[color[i]];
@@ -302,8 +304,17 @@ class App extends React.Component {
                     }).catch(err => {
                         console.log(err);
                     })
-
-        this.setState({ row: [], col: [], color: [], pixelPrices: [], selectPixels: [], isMaxCount: false })
+            this.setState({ row: [], col: [], color: [], pixelPrices: [], selectPixels: [], isMaxCount: false })
+        } else {
+            await Utils.contract.getPixelColor(row, col).call()
+                    .then(color => {
+                            canvas.fillStyle = this.state.colors[color];
+                            canvas.fillRect(this.state.selectPixels[inputIndex].row * rect.width / 100, this.state.selectPixels[inputIndex].col * rect.height / 100, rect.width / 100, rect.width / 100);
+                    }).catch(err => {
+                        console.log(err);
+                    });
+            await this.setState({ row: this.state.row, col: this.state.col, color: this.state.color, pixelPrices: this.state.pixelPrices, selectPixels: this.state.selectPixels, isMaxCount: false });
+        }
     }
 
     async withdraw() {
@@ -329,13 +340,26 @@ class App extends React.Component {
         element.classList.toggle('is-visible');
     }
 
+    async previous() {
+        if (this.state.row.length > 0) {
+            const e = this.state.selectPixels[this.state.selectPixels.length - 1];
+            await this.clear(e.row, e.col, this.state.selectPixels.length - 1);
+
+            await [this.state.row, this.state.col, this.state.color, this.state.pixelPrices, this.state.selectPixels].forEach((array, i) => {
+                array.pop();
+            });
+
+            await this.setState({ row: this.state.row, col: this.state.col, color: this.state.color, pixelPrices: this.state.pixelPrices, selectPixels: this.state.selectPixels, isMaxCount: false })
+        }
+    }
+
     render() {
         return (
             <div>
                 <Header />
                 <div id='pixel-canvas'>
                     <div className='controls-content left-controls'>
-                        <LeftControls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } updateColor={ this.updateSelectColor } clear={ this.clear } />
+                        <LeftControls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } updateColor={ this.updateSelectColor } clear={ this.clear } previous={ this.previous } />
                     </div>
                     <Canvas />
                     <div className='controls-content right-controls'>

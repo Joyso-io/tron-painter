@@ -13,7 +13,6 @@ class LeftControls extends React.Component {
         super(props);
         this.showColors = this.showColors.bind(this);
         this.selectColor = this.selectColor.bind(this);
-        this.buy = this.buy.bind(this);
     }
 
     showColors() {
@@ -27,10 +26,6 @@ class LeftControls extends React.Component {
         this.showColors();
     }
 
-    buy() {
-        this.props.buyPixels();
-    }
-
     render() {
         const colorItems = Object.entries(this.props.colors).map(([key,value])=>{
             const className = 'color color-' + key;
@@ -38,30 +33,30 @@ class LeftControls extends React.Component {
                 <li key={ key } className={ className } color={ value } onClick={ (e) => this.selectColor(e) } ></li>
             );
         })
-        let btn_class = this.state.colorsActive ? "colors active" : "colors";
+        let btn_class = this.state.colorsActive ? "active" : "";
 
         return (
             <div className="controls">
                 <div className="tools">
-                    <a className="colors-btn" onClick={this.showColors}>
+                    <a className="colors" onClick={ this.showColors }>
                     </a>
 
-                    <a className="eraser-btn">
+                    <a className="eraser">
                     </a>
 
-                    <a className="return-btn">
+                    <a className="previous" onClick={ this.props.previous } >
                     </a>
 
-                    <a className="move-btn">
+                    <a className="move">
                     </a>
 
-                    <a className="snapshot-btn">
+                    <a className="snapshot">
                     </a>
 
-                    <a className="trash-btn" onClick={ this.props.clear }>
+                    <a className="trash" onClick={ this.props.clear }>
                     </a>
 
-                    <ul className={btn_class}>
+                    <ul id="colors" className={btn_class}>
                         { colorItems }
                     </ul>
                 </div>
