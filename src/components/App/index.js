@@ -28,6 +28,7 @@ class App extends React.Component {
         userTotalSales: 0,
         pendingWithdrawal: 0,
         isMaxCount: false,
+        draw: true,
         selectPixels: [],
         colors: {
             0: '#fff',
@@ -58,6 +59,8 @@ class App extends React.Component {
         this.windowToCanvas = this.windowToCanvas.bind(this);
         this.pathExists = this.pathExists.bind(this);
         this.previous = this.previous.bind(this);
+        this.erase = this.erase.bind(this);
+        this.drawColor = this.drawColor.bind(this);
         this.getPixelColors = this.getPixelColors.bind(this);
         this.getAllIndexes = this.getAllIndexes.bind(this);
         this.checkPendingWithdrawal = this.checkPendingWithdrawal.bind(this);
@@ -198,29 +201,50 @@ class App extends React.Component {
         theCanvas.onmousedown = (e) => {
             const rowArray = []
             const colArray = []
-            if (this.state.currentColor) {
+            if (this.state.currentColor || !this.state.draw) {
                 isAllowDrawLine = true
                 let { row, col } = this.windowToCanvas(theCanvas, e, rect)
                 let colorInt = Object.keys(this.state.colors).find(key => this.state.colors[key] === this.state.currentColor);
                 let rowInt = row;
                 let colInt = col;
-                this.updatePixelState(row, col, colorInt, canvas, rect);
+                if (this.state.draw) {
+                    this.updatePixelState(row, col, colorInt, canvas, rect);
+                }
                 theCanvas.onmousemove = async (e) => {
                     const { row, col } = this.windowToCanvas(theCanvas, e, rect)
                     let intersection = this.pathExists(row, col, rowArray, colArray);
                     if (isAllowDrawLine && intersection < 1 && !(rowInt === row && colInt === col)) {
                         rowArray.push(row);
                         colArray.push(col);
-                        this.updatePixelState(row, col, colorInt, canvas, rect);
+                        if (this.state.draw) {
+                            this.updatePixelState(row, col, colorInt, canvas, rect);
+                        } else {
+                            let intersection = this.pathExists(row, col, this.state.row, this.state.col);
+
+                            if (intersection.length > 0) {
+                                await this.clear(row, col, intersection[0]);
+
+                                [this.state.row, this.state.col, this.state.color, this.state.pixelPrices, this.state.selectPixels].forEach((e) => {
+                                    e.splice(intersection[0], 1);
+                                })
+
+                                this.setState({ 
+                                    row: this.state.row, col: this.state.col, color: this.state.color, 
+                                    pixelPrices: this.state.pixelPrices, selectPixels: this.state.selectPixels, isMaxCount: false 
+                                })
+                            }
+                        }
                     }
                 }
             }
         }
         theCanvas.onmouseup = async (e) => {
-            isAllowDrawLine = false
-            let selectPixelPrices = await Utils.contract.getPixelPrices(this.state.row, this.state.col).call();
-            let pixelPrices = selectPixelPrices.map(function(item) { return (parseInt(item._hex, 16) / 1000000) });
-            this.setState({ pixelPrices: pixelPrices });
+            if (this.draw) {
+                isAllowDrawLine = false
+                let selectPixelPrices = await Utils.contract.getPixelPrices(this.state.row, this.state.col).call();
+                let pixelPrices = selectPixelPrices.map(function(item) { return (parseInt(item._hex, 16) / 1000000) });
+                this.setState({ pixelPrices: pixelPrices });
+            }
         }
     }
 
@@ -257,7 +281,7 @@ class App extends React.Component {
     pathExists(row, col, rowArray, colArray) {
         let rowIndex = new Set(this.getAllIndexes(rowArray, row));
         let colIndex = new Set(this.getAllIndexes(colArray, col));
-        let intersection =  Array.from(new Set([...rowIndex].filter(x => colIndex.has(x))));
+        let intersection = Array.from(new Set([...rowIndex].filter(x => colIndex.has(x))));
 
         return intersection
     }
@@ -314,12 +338,19 @@ class App extends React.Component {
                     }).catch(err => {
                         console.log(err);
                     });
-            await this.setState({ row: this.state.row, col: this.state.col, color: this.state.color, pixelPrices: this.state.pixelPrices, selectPixels: this.state.selectPixels, isMaxCount: false });
         }
     }
 
     async withdraw() {
         await Utils.contract.withdraw().send();
+    }
+
+    erase() {
+        this.setState({ draw: false })
+    }
+
+    drawColor() {
+        this.setState({ draw: true })
     }
 
     sum(arr) {
@@ -372,7 +403,10 @@ class App extends React.Component {
                 <Header />
                 <div id='pixel-canvas'>
                     <div className='controls-content left-controls'>
-                        <LeftControls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } updateColor={ this.updateSelectColor } clear={ this.clear } previous={ this.previous } toggle={ this.toggle } close={ this.close }/>
+                        <LeftControls 
+                            row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors }  drawColor={ this.drawColor }
+                            updateColor={ this.updateSelectColor } clear={ this.clear } previous={ this.previous } toggle={ this.toggle } close={ this.close } erase={ this.erase } 
+                            />
                     </div>
                     <Canvas close={ this.close }/>
                     <div className='controls-content right-controls'>

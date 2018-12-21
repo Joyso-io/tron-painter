@@ -15,6 +15,7 @@ class LeftControls extends React.Component {
     selectColor(e) {
         let element = e.target;
         let color = element.getAttribute('color');
+        this.props.drawColor();
         this.props.updateColor(color);
         this.props.close();
     }
@@ -45,10 +46,10 @@ class LeftControls extends React.Component {
         return (
             <div className="controls">
                 <div className="tools">
-                    <a className="colors" onClick={ this.props.toggle }>
+                    <a className="colors" onClick={ this.props.toggle } >
                     </a>
 
-                    <a className="eraser">
+                    <a className="eraser" onClick={ this.props.erase } >
                     </a>
 
                     <a className="previous" onClick={ this.props.previous } >
