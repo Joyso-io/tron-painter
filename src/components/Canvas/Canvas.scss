@@ -1,3 +1,45 @@
-#theCanvas {
-  background: #fff;
+.canvas-container {
+  position: relative;
+  width: 900px;
+  height: 900px;
+  overflow: hidden;
+
+  .up-down {
+    margin: 5px;
+    display: flex;
+    position: absolute;
+
+    > a {
+      width: 20px;
+      height: 20px;
+      background-color: #EAEAEA;
+      position: relative;
+
+      .layer2 {
+        position: absolute;
+        top: 2.6px;
+        left: calc(50% - 0.9px);
+        width: 1.8px;
+        height: 14.6px;
+        background-color: #2B2B2B;
+      }
+
+      .layer1 {
+        position: absolute;
+        top: calc(50% - 0.9px);
+        left: 2.6px;
+        width: 15px;
+        height: 1.8px;
+        background-color: #2B2B2B;
+      }
+
+      &:first-child {
+        margin-right: 5px;
+      }
+    }
+  }
+
+  #theCanvas {
+    background: #fff;
+  }
 }

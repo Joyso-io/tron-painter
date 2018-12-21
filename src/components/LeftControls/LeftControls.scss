@@ -17,10 +17,13 @@
         height: 50px;
         background-repeat: no-repeat;
 
+        &:hover {
+          background-color: #0D0D0D;
+        }
+
         &.colors {
           background-image: url('/images/pencil.svg');
           background-position: 15.5px 15px;
-          background-color: #0D0D0D;
         }
 
         &.eraser {

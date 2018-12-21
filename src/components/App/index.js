@@ -61,6 +61,8 @@ class App extends React.Component {
         this.previous = this.previous.bind(this);
         this.erase = this.erase.bind(this);
         this.drawColor = this.drawColor.bind(this);
+        this.up = this.up.bind(this);
+        this.down = this.down.bind(this);
         this.getPixelColors = this.getPixelColors.bind(this);
         this.getAllIndexes = this.getAllIndexes.bind(this);
         this.checkPendingWithdrawal = this.checkPendingWithdrawal.bind(this);
@@ -170,7 +172,6 @@ class App extends React.Component {
 
             this.getPixelColors(canvas, rect);
         }
-
     };
 
     getPixelColors(canvas, rect) {
@@ -199,11 +200,11 @@ class App extends React.Component {
         let isAllowDrawLine = false
 
         theCanvas.onmousedown = (e) => {
-            const rowArray = []
-            const colArray = []
+            const rowArray = [];
+            const colArray = [];
             if (this.state.currentColor || !this.state.draw) {
                 isAllowDrawLine = true
-                let { row, col } = this.windowToCanvas(theCanvas, e, rect)
+                let { row, col } = this.windowToCanvas(e)
                 let colorInt = Object.keys(this.state.colors).find(key => this.state.colors[key] === this.state.currentColor);
                 let rowInt = row;
                 let colInt = col;
@@ -211,7 +212,7 @@ class App extends React.Component {
                     this.updatePixelState(row, col, colorInt, canvas, rect);
                 }
                 theCanvas.onmousemove = async (e) => {
-                    const { row, col } = this.windowToCanvas(theCanvas, e, rect)
+                    const { row, col } = this.windowToCanvas(e)
                     let intersection = this.pathExists(row, col, rowArray, colArray);
                     if (isAllowDrawLine && intersection < 1 && !(rowInt === row && colInt === col)) {
                         rowArray.push(row);
@@ -248,7 +249,12 @@ class App extends React.Component {
         }
     }
 
-    windowToCanvas(canvas, e, rect) {
+    windowToCanvas(e) {
+        let theCanvas = document.querySelector('#theCanvas');
+        let canvas = theCanvas.getContext('2d');
+        canvas.clearRect(0, 0, canvas.width, canvas.height);
+        let rect = theCanvas.getBoundingClientRect();
+
         return {
             row: Math.floor((e.offsetX) * 100 / rect.width),
             col: Math.floor((e.offsetY) * 100 / rect.height)
@@ -324,7 +330,7 @@ class App extends React.Component {
                     .then(color => {
                         for (var i = 0; i < this.state.selectPixels.length; i++) {
                             canvas.fillStyle = this.state.colors[color[i]];
-                            canvas.fillRect(this.state.selectPixels[i].row * rect.width / 100, this.state.selectPixels[i].col * rect.height / 100, rect.width / 100, rect.width / 100);
+                            canvas.fillRect(this.state.selectPixels[i].row * 9, this.state.selectPixels[i].col * 9, 9, 9);
                         }
                     }).catch(err => {
                         console.log(err);
@@ -333,8 +339,14 @@ class App extends React.Component {
         } else {
             await Utils.contract.getPixelColor(row, col).call()
                     .then(color => {
+                        console.log(theCanvas);
+                        console.log("rect: " + rect.height);
+                            console.log("row: " + this.state.selectPixels[inputIndex].row);
+                            console.log("col: " + this.state.selectPixels[inputIndex].col);
+                            console.log("width: " + (this.state.selectPixels[inputIndex].row * rect.width / 100));
+                            console.log("width: " + (this.state.selectPixels[inputIndex].col * rect.height / 100));
                             canvas.fillStyle = this.state.colors[color];
-                            canvas.fillRect(this.state.selectPixels[inputIndex].row * rect.width / 100, this.state.selectPixels[inputIndex].col * rect.height / 100, rect.width / 100, rect.width / 100);
+                            canvas.fillRect(this.state.selectPixels[inputIndex].row * 9, this.state.selectPixels[inputIndex].col * 9, 9, 9);
                     }).catch(err => {
                         console.log(err);
                     });
@@ -397,6 +409,25 @@ class App extends React.Component {
         }
     }
 
+    up() {
+        const canvas = document.getElementById('theCanvas');
+        if (canvas.style.width === "") {
+            canvas.style.width = "1200px";
+            canvas.style.height = "1200px";
+        } else {
+            canvas.style.width = parseInt(canvas.style.width, 10) + 300 + "px"
+            canvas.style.height = parseInt(canvas.style.height, 10) + 300 + "px"
+        }
+    }
+
+    down() {
+        const canvas = document.getElementById('theCanvas');
+        if (canvas.style.width !== "" && canvas.style.width !== "900px") {
+            canvas.style.width = parseInt(canvas.style.width, 10) - 300 + "px"
+            canvas.style.height = parseInt(canvas.style.height, 10) - 300 + "px"
+        }
+    }
+
     render() {
         return (
             <div>
@@ -408,7 +439,7 @@ class App extends React.Component {
                             updateColor={ this.updateSelectColor } clear={ this.clear } previous={ this.previous } toggle={ this.toggle } close={ this.close } erase={ this.erase } 
                             />
                     </div>
-                    <Canvas close={ this.close }/>
+                    <Canvas close={ this.close } up={ this.up } down={ this.down }/>
                     <div className='controls-content right-controls'>
                         <RightControls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } 
                                        buyPixels= { this.buyPixels } userTotalSales={ this.state.userTotalSales } pendingWithdrawal={ this.state.pendingWithdrawal } withdraw={ this.withdraw } toggle={ this.toggle } clear={ this.clear } />
