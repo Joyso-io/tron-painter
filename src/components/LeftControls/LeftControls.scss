@@ -59,10 +59,9 @@
         transform: translateX(0px);
         z-index: -1;
 
-        &.active {
+        &.is-visible {
           z-index: 100;
           transform: translateX(47px);
-
         }
 
         li {

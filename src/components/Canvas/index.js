@@ -6,7 +6,7 @@ import './Canvas.scss';
 
 const Canvas = props => {
     return (
-        <canvas id="theCanvas" width="900" height="900"></canvas>
+        <canvas id="theCanvas" width="900" height="900" onClick={ props.close }></canvas>
     );
 };
 

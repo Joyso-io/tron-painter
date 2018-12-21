@@ -54,6 +54,7 @@ class App extends React.Component {
         this.sum = this.sum.bind(this);
         this.clear = this.clear.bind(this);
         this.toggle = this.toggle.bind(this);
+        this.close = this.close.bind(this);
         this.windowToCanvas = this.windowToCanvas.bind(this);
         this.pathExists = this.pathExists.bind(this);
         this.previous = this.previous.bind(this);
@@ -335,12 +336,24 @@ class App extends React.Component {
 
     toggle(e) {
         let name = e.target.className;
-        let element = document.querySelector("#" + name);
+        let element = document.getElementById(name);
+
+        if (!element.classList.contains('is-visible')) {
+            this.close();
+        }
 
         element.classList.toggle('is-visible');
     }
 
+    close() {
+        let visibles = document.querySelectorAll('.is-visible');
+        visibles.forEach((e) => {
+            e.classList.remove('is-visible');
+        });
+    }
+
     async previous() {
+        this.close();
         if (this.state.row.length > 0) {
             const e = this.state.selectPixels[this.state.selectPixels.length - 1];
             await this.clear(e.row, e.col, this.state.selectPixels.length - 1);
@@ -359,9 +372,9 @@ class App extends React.Component {
                 <Header />
                 <div id='pixel-canvas'>
                     <div className='controls-content left-controls'>
-                        <LeftControls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } updateColor={ this.updateSelectColor } clear={ this.clear } previous={ this.previous } />
+                        <LeftControls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } updateColor={ this.updateSelectColor } clear={ this.clear } previous={ this.previous } toggle={ this.toggle } close={ this.close }/>
                     </div>
-                    <Canvas />
+                    <Canvas close={ this.close }/>
                     <div className='controls-content right-controls'>
                         <RightControls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } 
                                        buyPixels= { this.buyPixels } userTotalSales={ this.state.userTotalSales } pendingWithdrawal={ this.state.pendingWithdrawal } withdraw={ this.withdraw } toggle={ this.toggle } clear={ this.clear } />

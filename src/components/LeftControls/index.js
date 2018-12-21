@@ -5,35 +5,32 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import './LeftControls.scss';
 
 class LeftControls extends React.Component {
-    state = {
-       colorsActive: false,
-       canvas: null
-    }
-
     constructor(props) {
         super(props);
-        this.showColors = this.showColors.bind(this);
         this.selectColor = this.selectColor.bind(this);
         this.download = this.download.bind(this);
-    }
-
-    showColors() {
-       this.setState({ colorsActive: !this.state.colorsActive })
+        this.clearAll = this.clearAll.bind(this);
     }
 
     selectColor(e) {
         let element = e.target;
         let color = element.getAttribute('color');
         this.props.updateColor(color);
-        this.showColors();
+        this.props.close();
     }
 
     download() {
+        this.props.close();
         const canvas = document.getElementById('theCanvas');
         const context = canvas.getContext('2d');
         const url = canvas.toDataURL();
         const snapshot = document.querySelector('.snapshot');
         snapshot.href = url;
+    }
+
+    clearAll() {
+        this.props.close();
+        this.props.clear();
     }
 
     render() {
@@ -44,12 +41,11 @@ class LeftControls extends React.Component {
             );
         })
         const save_url = this.save;
-        let btn_class = this.state.colorsActive ? "active" : "";
 
         return (
             <div className="controls">
                 <div className="tools">
-                    <a className="colors" onClick={ this.showColors }>
+                    <a className="colors" onClick={ this.props.toggle }>
                     </a>
 
                     <a className="eraser">
@@ -64,10 +60,10 @@ class LeftControls extends React.Component {
                     <a className="snapshot" href="#" download="PixelPainter.png" onClick={ this.download } >
                     </a>
 
-                    <a className="trash" onClick={ this.props.clear }>
+                    <a className="trash" onClick={ this.clearAll }>
                     </a>
 
-                    <ul id="colors" className={btn_class}>
+                    <ul id="colors">
                         { colorItems }
                     </ul>
                 </div>
