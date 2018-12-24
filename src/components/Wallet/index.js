@@ -11,7 +11,6 @@ class Wallet extends React.Component {
     }
 
     render() {
-        console.log(this.props.tronWeb)
         if(this.props.tronWeb.loggedIn) {
             const address = this.props.tronWeb.userAddress;
             const balance = this.props.tronWeb.balance;
