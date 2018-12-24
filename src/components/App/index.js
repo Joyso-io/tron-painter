@@ -470,7 +470,7 @@ class App extends React.Component {
                             updateColor={ this.updateSelectColor } clear={ this.clear } previous={ this.previous } toggle={ this.toggle } close={ this.close } erase={ this.erase } moveCanvas= { this.moveCanvas }
                             />
                     </div>
-                    <Canvas close={ this.close } up={ this.up } down={ this.down } />
+                    <Canvas close={ this.close } up={ this.up } down={ this.down } canvasStatus={ this.state.canvasStatus } />
                     <div className='controls-content right-controls'>
                         <RightControls 
                             row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } tronWeb={ this.state.tronWeb }

@@ -5,6 +5,15 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import './Canvas.scss';
 
 const Canvas = props => {
+    let canvasClass = null;
+    if(props.canvasStatus === 0) {
+        canvasClass = "eraser"
+    } else if (props.canvasStatus === 1) {
+        canvasClass = "pencil"
+    } else if (props.canvasStatus === 2) {
+        canvasClass = "move"
+    }
+
     return (
       <div className="canvas-container">
         <div className="up-down">
@@ -16,7 +25,7 @@ const Canvas = props => {
             <div className="layer1"></div>
           </a>
         </div>
-        <canvas id="theCanvas" width="900" height="900" onClick={ props.close }></canvas>
+        <canvas id="theCanvas" className={ canvasClass } width="900" height="900" onClick={ props.close }></canvas>
       </div>
     );
 };
