@@ -55,7 +55,7 @@ class LeftControls extends React.Component {
                     <a className="previous" onClick={ this.props.previous } >
                     </a>
 
-                    <a className="move">
+                    <a className="move" onClick={ this.props.moveCanvas } >
                     </a>
 
                     <a className="snapshot" href="#" download="PixelPainter.png" onClick={ this.download } >

@@ -28,7 +28,7 @@ class App extends React.Component {
         userTotalSales: 0,
         pendingWithdrawal: 0,
         isMaxCount: false,
-        draw: true,
+        canvasStatus: null,
         selectPixels: [],
         colors: {
             0: '#fff',
@@ -63,6 +63,7 @@ class App extends React.Component {
         this.drawColor = this.drawColor.bind(this);
         this.up = this.up.bind(this);
         this.down = this.down.bind(this);
+        this.moveCanvas = this.moveCanvas.bind(this);
         this.getPixelColors = this.getPixelColors.bind(this);
         this.getAllIndexes = this.getAllIndexes.bind(this);
         this.checkPendingWithdrawal = this.checkPendingWithdrawal.bind(this);
@@ -202,13 +203,13 @@ class App extends React.Component {
         theCanvas.onmousedown = (e) => {
             const rowArray = [];
             const colArray = [];
-            if (this.state.currentColor || !this.state.draw) {
+            if (this.state.currentColor || this.state.canvasStatus === 0 || this.state.canvasStatus === 1) {
                 isAllowDrawLine = true
                 let { row, col } = this.windowToCanvas(e)
                 let colorInt = Object.keys(this.state.colors).find(key => this.state.colors[key] === this.state.currentColor);
                 let rowInt = row;
                 let colInt = col;
-                if (this.state.draw) {
+                if (this.state.canvasStatus === 1) {
                     this.updatePixelState(row, col, colorInt, canvas, rect);
                 }
                 theCanvas.onmousemove = async (e) => {
@@ -217,7 +218,7 @@ class App extends React.Component {
                     if (isAllowDrawLine && intersection < 1 && !(rowInt === row && colInt === col)) {
                         rowArray.push(row);
                         colArray.push(col);
-                        if (this.state.draw) {
+                        if (this.state.canvasStatus === 1) {
                             this.updatePixelState(row, col, colorInt, canvas, rect);
                         } else {
                             let intersection = this.pathExists(row, col, this.state.row, this.state.col);
@@ -234,6 +235,31 @@ class App extends React.Component {
                                     pixelPrices: this.state.pixelPrices, selectPixels: this.state.selectPixels, isMaxCount: false 
                                 })
                             }
+                        }
+                    }
+                }
+            } else if (this.state.canvasStatus === 2) {
+                isAllowDrawLine = true;
+                var e = e || window.event;
+                var diffX = e.clientX - theCanvas.offsetLeft;
+                var diffY = e.clientY - theCanvas.offsetTop;
+
+                theCanvas.onmousemove = async (e) => {
+                    if (isAllowDrawLine) {
+                        theCanvas.style.marginLeft = e.clientX - diffX + 'px';
+                        theCanvas.style.marginTop = e.clientY - diffY + 'px';
+
+                        var cw = document.documentElement.clientWidth || document.body.clientWidth;
+                        var ch = document.documentElement.clientHeight || document.body.clientHeight;
+                        if (e.clientX - diffX < 0) {
+                            theCanvas.style.left = '0px';
+                        }else if (e.clientX - diffX > cw - theCanvas.offsetWidth) {
+                            theCanvas.style.left = cw - theCanvas.offsetWidth + 'px';
+                        }
+                        if (e.clientY - diffY < 0) {
+                            theCanvas.style.top = '0px';
+                        }else if (e.clientY > ch - theCanvas.offsetHeight) {
+                            theCanvas.style.top = ch - theCanvas.offsetHeight + 'px';
                         }
                     }
                 }
@@ -339,12 +365,6 @@ class App extends React.Component {
         } else {
             await Utils.contract.getPixelColor(row, col).call()
                     .then(color => {
-                        console.log(theCanvas);
-                        console.log("rect: " + rect.height);
-                            console.log("row: " + this.state.selectPixels[inputIndex].row);
-                            console.log("col: " + this.state.selectPixels[inputIndex].col);
-                            console.log("width: " + (this.state.selectPixels[inputIndex].row * rect.width / 100));
-                            console.log("width: " + (this.state.selectPixels[inputIndex].col * rect.height / 100));
                             canvas.fillStyle = this.state.colors[color];
                             canvas.fillRect(this.state.selectPixels[inputIndex].row * 9, this.state.selectPixels[inputIndex].col * 9, 9, 9);
                     }).catch(err => {
@@ -358,11 +378,15 @@ class App extends React.Component {
     }
 
     erase() {
-        this.setState({ draw: false })
+        this.setState({ canvasStatus: 0, currentColor: null })
     }
 
     drawColor() {
-        this.setState({ draw: true })
+        this.setState({ canvasStatus: 1 })
+    }
+
+    moveCanvas() {
+        this.setState({ canvasStatus: 2, currentColor: null })
     }
 
     sum(arr) {
@@ -436,10 +460,10 @@ class App extends React.Component {
                     <div className='controls-content left-controls'>
                         <LeftControls 
                             row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors }  drawColor={ this.drawColor }
-                            updateColor={ this.updateSelectColor } clear={ this.clear } previous={ this.previous } toggle={ this.toggle } close={ this.close } erase={ this.erase } 
+                            updateColor={ this.updateSelectColor } clear={ this.clear } previous={ this.previous } toggle={ this.toggle } close={ this.close } erase={ this.erase } moveCanvas= { this.moveCanvas }
                             />
                     </div>
-                    <Canvas close={ this.close } up={ this.up } down={ this.down }/>
+                    <Canvas close={ this.close } up={ this.up } down={ this.down } />
                     <div className='controls-content right-controls'>
                         <RightControls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } 
                                        buyPixels= { this.buyPixels } userTotalSales={ this.state.userTotalSales } pendingWithdrawal={ this.state.pendingWithdrawal } withdraw={ this.withdraw } toggle={ this.toggle } clear={ this.clear } />
