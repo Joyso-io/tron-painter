@@ -41,5 +41,17 @@
 
   #theCanvas {
     background: #fff;
+
+    &.eraser {
+      cursor: url('/images/eraser-black.svg') 0 40, default;
+    }
+
+    &.pencil {
+      cursor: url('/images/pencil-black.svg') 0 40, default;
+    }
+
+    &.move {
+      cursor: move;
+    }
   }
 }
