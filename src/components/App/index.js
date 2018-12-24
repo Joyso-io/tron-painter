@@ -1,38 +1,80 @@
 import React from 'react';
-import Message from 'components/Message';
-import Featured from 'components/Featured';
 import TronLinkGuide from 'components/TronLinkGuide';
 import TronWeb from 'tronweb';
+// import TronPixel from 'components/TronPixel'
+import Header from 'components/Header';
+import Canvas from 'components/Canvas';
+import LeftControls from 'components/LeftControls';
+import RightControls from 'components/RightControls';
 import Utils from 'utils';
 import Swal from 'sweetalert2';
-import banner from 'assets/banner.png';
+// import banner from 'assets/banner.png';
 
 import './App.scss';
 
-const FOUNDATION_ADDRESS = 'TWiWt5SEDzaEqS6kE5gandWMNfxR2B5xzg';
+const FOUNDATION_ADDRESS = 'TFSiTozdHoj5J9EgNqXCXXLg4mhwnWSopS';
 
 class App extends React.Component {
     state = {
         tronWeb: {
             installed: false,
-            loggedIn: false
+            loggedIn: false,
+            userAddress: null,
+            balance: 0
         },
-        currentMessage: {
-            message: '',
-            loading: false
-        },
-        messages: {
-            recent: {},
-            featured: []
+        row: [],
+        col: [],
+        color: [],
+        pixelPrices: [],
+        currentColor: null,
+        userTotalSales: 0,
+        pendingWithdrawal: 0,
+        isMaxCount: false,
+        canvasStatus: null,
+        selectPixels: [],
+        colors: {
+            0: '#fff',
+            1: '#e4e4e4',
+            2: '#888',
+            3: '#222',
+            4: '#ffa7d1',
+            5: '#e50000',
+            6: '#e59500',
+            7: '#a06a42',
+            8: '#e5d900',
+            9: '#94e044',
+            10: '#02be01',
+            11: '#00d3dd',
+            12: '#0083c7',
+            13: '#0000ea',
+            14: '#cf6ee4',
+            15: '#820080'
         }
     }
 
     constructor(props) {
         super(props);
-
-        this.onMessageEdit = this.onMessageEdit.bind(this);
-        this.onMessageSend = this.onMessageSend.bind(this);
-        this.onMessageTip = this.onMessageTip.bind(this);
+        this.sum = this.sum.bind(this);
+        this.clear = this.clear.bind(this);
+        this.toggle = this.toggle.bind(this);
+        this.close = this.close.bind(this);
+        this.windowToCanvas = this.windowToCanvas.bind(this);
+        this.pathExists = this.pathExists.bind(this);
+        this.previous = this.previous.bind(this);
+        this.erase = this.erase.bind(this);
+        this.drawColor = this.drawColor.bind(this);
+        this.up = this.up.bind(this);
+        this.down = this.down.bind(this);
+        this.moveCanvas = this.moveCanvas.bind(this);
+        this.getPixelColors = this.getPixelColors.bind(this);
+        this.getAllIndexes = this.getAllIndexes.bind(this);
+        this.checkPendingWithdrawal = this.checkPendingWithdrawal.bind(this);
+        this.userTotalSales = this.userTotalSales.bind(this);
+        this.draw = this.draw.bind(this);
+        this.updateSelectColor = this.updateSelectColor.bind(this);
+        this.drawPixel = this.drawPixel.bind(this);
+        this.updatePixelState = this.updatePixelState.bind(this);
+        this.buyPixels = this.buyPixels.bind(this);
     }
 
     async componentDidMount() {
@@ -97,14 +139,23 @@ class App extends React.Component {
                 base58: FOUNDATION_ADDRESS
             };
 
-            window.tronWeb.on('addressChanged', () => {
+            window.tronWeb.on('addressChanged', async() => {
+                await Utils.setTronWeb(window.tronWeb);
+                this.checkPendingWithdrawal();
+                this.userTotalSales(window.tronWeb.defaultAddress.hex);
                 if(this.state.tronWeb.loggedIn)
                     return;
+                
+                const address = window.tronWeb.defaultAddress.base58;
+                let balance = await window.tronWeb.trx.getBalance(address);
+                balance = balance / 1000000;
 
-                this.setState({
+                await this.setState({
                     tronWeb: {
                         installed: true,
-                        loggedIn: true
+                        loggedIn: true,
+                        userAddress: address,
+                        balance: balance
                     }
                 });
             });
@@ -112,275 +163,320 @@ class App extends React.Component {
 
         await Utils.setTronWeb(window.tronWeb);
 
-        this.startEventListener();
-        this.fetchMessages();
+        this.draw();
+        this.drawPixel();
+        this.userTotalSales(window.tronWeb.defaultAddress.hex);
+        this.checkPendingWithdrawal();
     }
 
-    // Polls blockchain for smart contract events
-    startEventListener() {
-        Utils.contract.MessagePosted().watch((err, { result }) => {
-            if(err)
-                return console.error('Failed to bind event listener:', err);
+    draw() {
+        let theCanvas = document.querySelector('#theCanvas');
+        if (!theCanvas || !theCanvas.getContext) {
+            return false
+        } else {
+            let canvas = theCanvas.getContext('2d');
+            canvas.clearRect(0, 0, canvas.width, canvas.height);
+            let rect = theCanvas.getBoundingClientRect();
 
-            console.log('Detected new message:', result.id);
-            this.fetchMessage(+result.id);
-        });
+            this.getPixelColors(canvas, rect);
+        }
+    };
 
-        /*Utils.contract.MessageTipped().watch((err, { result }) => {
-            if(err)
-                return console.error('Failed to bind event listener:', err);
+    getPixelColors(canvas, rect) {
+        for (var row = 0; row < 100; row++) {
+            Utils.contract.getPixelRowColors(row).call()
+                .then(colors => {
+                    for (var col = 0; col < 100; col++) {
+                        canvas.fillStyle = this.state.colors[colors[1][col]];
+                        canvas.fillRect(colors[0] * rect.width / 100, col * rect.height / 100, rect.width / 100, rect.width / 100);
+                    }
+                }).catch(err => {
+                    console.log(err);
+                })
+        }
+    };
 
-            console.log('Message was tipped:', result.id);
-            this.fetchMessage(+result.id);
-        });
+    updateSelectColor(newColorString) {
+        this.setState({ currentColor: newColorString });
+    }
 
-        Utils.contract.MessageAddedToTopPosts().watch((err, { result }) => {
-            if(err)
-                return console.error('Failed to bind event listener:', err);
+    drawPixel() {
+        let theCanvas = document.querySelector('#theCanvas');
+        let canvas = theCanvas.getContext('2d');
+        canvas.clearRect(0, 0, canvas.width, canvas.height);
+        let rect = theCanvas.getBoundingClientRect();
+        let isAllowDrawLine = false
 
-            console.log('Message was added to featured posts:', result.id);
-            this.fetchMessage(+result.id);
-
-            const {
-                recent,
-                featured
-            } = this.state.messages;
-
-            if(featured.includes(+result.id))
-                return;
-
-            this.setState({
-                messages: {
-                    recent: this.state.messages.recent,
-                    featured: [ ...featured, +result.id ]
+        theCanvas.onmousedown = (e) => {
+            const rowArray = [];
+            const colArray = [];
+            if (this.state.currentColor || this.state.canvasStatus === 0 || this.state.canvasStatus === 1) {
+                isAllowDrawLine = true
+                let { row, col } = this.windowToCanvas(e)
+                let colorInt = Object.keys(this.state.colors).find(key => this.state.colors[key] === this.state.currentColor);
+                let rowInt = row;
+                let colInt = col;
+                if (this.state.canvasStatus === 1) {
+                    this.updatePixelState(row, col, colorInt, canvas, rect);
                 }
+                theCanvas.onmousemove = async (e) => {
+                    const { row, col } = this.windowToCanvas(e)
+                    let intersection = this.pathExists(row, col, rowArray, colArray);
+                    if (isAllowDrawLine && intersection < 1 && !(rowInt === row && colInt === col)) {
+                        rowArray.push(row);
+                        colArray.push(col);
+                        if (this.state.canvasStatus === 1) {
+                            this.updatePixelState(row, col, colorInt, canvas, rect);
+                        } else {
+                            let intersection = this.pathExists(row, col, this.state.row, this.state.col);
+
+                            if (intersection.length > 0) {
+                                await this.clear(row, col, intersection[0]);
+
+                                [this.state.row, this.state.col, this.state.color, this.state.pixelPrices, this.state.selectPixels].forEach((e) => {
+                                    e.splice(intersection[0], 1);
+                                })
+
+                                this.setState({ 
+                                    row: this.state.row, col: this.state.col, color: this.state.color, 
+                                    pixelPrices: this.state.pixelPrices, selectPixels: this.state.selectPixels, isMaxCount: false 
+                                })
+                            }
+                        }
+                    }
+                }
+            } else if (this.state.canvasStatus === 2) {
+                isAllowDrawLine = true;
+                var e = e || window.event;
+                var diffX = e.clientX - theCanvas.offsetLeft;
+                var diffY = e.clientY - theCanvas.offsetTop;
+
+                theCanvas.onmousemove = async (e) => {
+                    if (isAllowDrawLine) {
+                        theCanvas.style.marginLeft = e.clientX - diffX + 'px';
+                        theCanvas.style.marginTop = e.clientY - diffY + 'px';
+
+                        var cw = document.documentElement.clientWidth || document.body.clientWidth;
+                        var ch = document.documentElement.clientHeight || document.body.clientHeight;
+                        if (e.clientX - diffX < 0) {
+                            theCanvas.style.left = '0px';
+                        }else if (e.clientX - diffX > cw - theCanvas.offsetWidth) {
+                            theCanvas.style.left = cw - theCanvas.offsetWidth + 'px';
+                        }
+                        if (e.clientY - diffY < 0) {
+                            theCanvas.style.top = '0px';
+                        }else if (e.clientY > ch - theCanvas.offsetHeight) {
+                            theCanvas.style.top = ch - theCanvas.offsetHeight + 'px';
+                        }
+                    }
+                }
+            }
+        }
+        theCanvas.onmouseup = async (e) => {
+            if (this.draw) {
+                isAllowDrawLine = false
+                let selectPixelPrices = await Utils.contract.getPixelPrices(this.state.row, this.state.col).call();
+                let pixelPrices = selectPixelPrices.map(function(item) { return (parseInt(item._hex, 16) / 1000000) });
+                this.setState({ pixelPrices: pixelPrices });
+            }
+        }
+    }
+
+    windowToCanvas(e) {
+        let theCanvas = document.querySelector('#theCanvas');
+        let canvas = theCanvas.getContext('2d');
+        canvas.clearRect(0, 0, canvas.width, canvas.height);
+        let rect = theCanvas.getBoundingClientRect();
+
+        return {
+            row: Math.floor((e.offsetX) * 100 / rect.width),
+            col: Math.floor((e.offsetY) * 100 / rect.height)
+        }
+    }
+
+    updatePixelState(row, col, colorInt, canvas, rect) {
+        let intersection = this.pathExists(row, col, this.state.row, this.state.col);
+
+        if (intersection.length > 0) {
+            this.state.color[intersection[0]] = colorInt;
+            this.setState({ color: this.state.color });
+
+            canvas.fillStyle = this.state.currentColor;
+            canvas.fillRect(row * rect.width / 100, col * rect.height / 100, rect.width / 100, rect.width / 100);
+        } else if(!this.state.isMaxCount) {
+            this.setState({ 
+                row: this.state.row.concat(row), col: this.state.col.concat(col), color: this.state.color.concat(colorInt),
+                selectPixels: this.state.selectPixels.concat({ row: row, col: col })
             });
+
+            if (this.state.row.length > 99)
+                this.setState({ isMaxCount: true })
+
+            canvas.fillStyle = this.state.currentColor;
+            canvas.fillRect(row * rect.width / 100, col * rect.height / 100, rect.width / 100, rect.width / 100);
+        }
+    }
+
+    pathExists(row, col, rowArray, colArray) {
+        let rowIndex = new Set(this.getAllIndexes(rowArray, row));
+        let colIndex = new Set(this.getAllIndexes(colArray, col));
+        let intersection = Array.from(new Set([...rowIndex].filter(x => colIndex.has(x))));
+
+        return intersection
+    }
+
+
+
+    async buyPixels() {
+        let total_price = this.state.pixelPrices.reduce((sum, x) => sum + x).toFixed(2);
+
+        await Utils.contract.buyPixels(this.state.row, this.state.col, this.state.color).send({ callValue: Utils.contract.tronWeb.toSun(total_price) });
+        await this.clear();
+    }
+
+    async checkPendingWithdrawal() {
+        let respond = await Utils.contract.checkPendingWithdrawal().call();
+        await this.setState({ pendingWithdrawal: (parseInt(respond._hex, 16) / 1000000) })
+    }
+
+    async userTotalSales(address) {
+        let respond = await Utils.contract.getUserTotalSales(address).call();
+        await this.setState({ userTotalSales: (parseInt(respond._hex, 16) / 1000000) })
+    }
+
+    async clear(row = null, col = null, inputIndex = null) {
+        let theCanvas = document.querySelector('#theCanvas');
+        let canvas = theCanvas.getContext('2d');
+        canvas.clearRect(0, 0, canvas.width, canvas.height);
+        let rect = theCanvas.getBoundingClientRect();
+
+        let rows = new Array();
+        let cols = new Array();
+
+        if (row === null || col == null || inputIndex == null) {
+            for (let index in this.state.selectPixels) {
+                rows.push(this.state.selectPixels[index].row);
+                cols.push(this.state.selectPixels[index].col);
+            }
+
+            await Utils.contract.getPixelColors(rows, cols).call()
+                    .then(color => {
+                        for (var i = 0; i < this.state.selectPixels.length; i++) {
+                            canvas.fillStyle = this.state.colors[color[i]];
+                            canvas.fillRect(this.state.selectPixels[i].row * 9, this.state.selectPixels[i].col * 9, 9, 9);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                    })
+            this.setState({ row: [], col: [], color: [], pixelPrices: [], selectPixels: [], isMaxCount: false })
+        } else {
+            await Utils.contract.getPixelColor(row, col).call()
+                    .then(color => {
+                            canvas.fillStyle = this.state.colors[color];
+                            canvas.fillRect(this.state.selectPixels[inputIndex].row * 9, this.state.selectPixels[inputIndex].col * 9, 9, 9);
+                    }).catch(err => {
+                        console.log(err);
+                    });
+        }
+    }
+
+    async withdraw() {
+        await Utils.contract.withdraw().send();
+    }
+
+    erase() {
+        this.setState({ canvasStatus: 0, currentColor: null })
+    }
+
+    drawColor() {
+        this.setState({ canvasStatus: 1 })
+    }
+
+    moveCanvas() {
+        this.setState({ canvasStatus: 2, currentColor: null })
+    }
+
+    sum(arr) {
+      return arr.reduce((sum, x) => sum + x);
+    }
+
+    getAllIndexes(arr, val) {
+        var indexes = [], i = -1;
+        while ((i = arr.indexOf(val, i+1)) != -1){
+            indexes.push(i);
+        }
+        return indexes;
+    }
+
+    toggle(e) {
+        let name = e.target.className;
+        let element = document.getElementById(name);
+
+        if (!element.classList.contains('is-visible')) {
+            this.close();
+        }
+
+        element.classList.toggle('is-visible');
+    }
+
+    close() {
+        let visibles = document.querySelectorAll('.is-visible');
+        visibles.forEach((e) => {
+            e.classList.remove('is-visible');
         });
+    }
 
-        Utils.contract.MessageRemovedFromTopPosts().watch((err, { result }) => {
-            if(err)
-                return console.error('Failed to bind event listener:', err);
+    async previous() {
+        this.close();
+        if (this.state.row.length > 0) {
+            const e = this.state.selectPixels[this.state.selectPixels.length - 1];
+            await this.clear(e.row, e.col, this.state.selectPixels.length - 1);
 
-            console.log('Message was removed from featured posts:', result.id);
-            this.fetchMessage(+result.id);
-
-            const {
-                recent,
-                featured
-            } = this.state.messages;
-
-            if(!featured.includes(+result.id))
-                return;
-
-            this.setState({
-                messages: {
-                    recent: this.state.messages.recent,
-                    featured: featured.filter(messageID => messageID !== +result.id)
-                }
+            await [this.state.row, this.state.col, this.state.color, this.state.pixelPrices, this.state.selectPixels].forEach((array, i) => {
+                array.pop();
             });
-        });*/
+
+            await this.setState({ row: this.state.row, col: this.state.col, color: this.state.color, pixelPrices: this.state.pixelPrices, selectPixels: this.state.selectPixels, isMaxCount: false })
+        }
     }
 
-    async fetchMessages() {
-        this.setState({
-            messages: await Utils.fetchMessages()
-        });
+    up() {
+        const canvas = document.getElementById('theCanvas');
+        if (canvas.style.width === "") {
+            canvas.style.width = "1200px";
+            canvas.style.height = "1200px";
+        } else {
+            canvas.style.width = parseInt(canvas.style.width, 10) + 300 + "px"
+            canvas.style.height = parseInt(canvas.style.height, 10) + 300 + "px"
+        }
     }
 
-    async fetchMessage(messageID) {
-        const {
-            recent,
-            featured,
-            message
-        } = await Utils.fetchMessage(messageID, this.state.messages);
-
-        this.setState({
-            messages: {
-                recent,
-                featured
-            }
-        });
-
-        return message;
-    }
-
-    // Stores value of textarea to state
-    onMessageEdit({ target: { value } }) {
-        if(this.state.currentMessage.loading)
-            return;
-
-        this.setState({
-            currentMessage: {
-                message: value,
-                loading: false
-            }
-        });
-    }
-
-    // Submits message to the blockchain
-    onMessageSend() {
-        const {
-            loading,
-            message
-        } = this.state.currentMessage;
-
-        if(loading)
-            return;
-
-        if(!message.trim().length)
-            return;
-
-        this.setState({
-            currentMessage: {
-                loading: true,
-                message
-            }
-        });
-
-        Utils.contract.postMessage(message).send({
-            shouldPollResponse: true,
-            callValue: 0
-        }).then(res => Swal({
-            title: 'Post Created',
-            type: 'success'
-        })).catch(err => Swal({
-            title: 'Post Failed',
-            type: 'error'
-        })).then(() => {
-            this.setState({
-                currentMessage: {
-                    loading: false,
-                    message
-                }
-            });
-        });
-    }
-
-    // Tips a message with a specific amount
-    async onMessageTip(messageID) {
-        const messages = {
-            ...this.state.messages.recent,
-            ...this.state.messages.featured
-        };
-
-        if(!messages.hasOwnProperty(messageID))
-            return;
-
-        if(!this.state.tronWeb.loggedIn)
-            return;
-
-        if(messages[messageID].owner === Utils.tronWeb.defaultAddress.base58)
-            return;
-
-        const { value } = await Swal({
-            title: 'Tip Message',
-            text: 'Enter tip amount in TRX',
-            confirmButtonText: 'Tip',
-            input: 'text',
-            showCancelButton: true,
-            showLoaderOnConfirm: true,
-            reverseButtons: true,
-            allowOutsideClick: () => !Swal.isLoading(),
-            allowEscapeKey: () => !Swal.isLoading(),
-            preConfirm: amount => {
-                if(isNaN(amount) || amount <= 0) {
-                    Swal.showValidationMessage('Invalid tip amount provided');
-                    return false;
-                }
-
-                return Utils.contract.tipMessage(+messageID).send({
-                    callValue: Number(amount) * 1000000
-                }).then(() => true).catch(err => {
-                    Swal.showValidationMessage(err);
-                });
-            }
-        });
-
-        value && Swal({
-            title: 'Message Tipped',
-            type: 'success'
-        });
-    }
-
-    renderMessageInput() {
-        if(!this.state.tronWeb.installed)
-            return <TronLinkGuide />;
-
-        if(!this.state.tronWeb.loggedIn)
-            return <TronLinkGuide installed />;
-
-        return (
-            <div className={ 'messageInput' + (this.state.currentMessage.loading ? ' loading' : '') }>
-                <textarea
-                    placeholder='Enter your message to post'
-                    value={ this.state.currentMessage.message }
-                    onChange={ this.onMessageEdit }></textarea>
-                <div className='footer'>
-                    <div className='warning'>
-                        Posting a message will cost 1 TRX and network fees
-                    </div>
-                    <div
-                        className={ 'sendButton' + (!!this.state.currentMessage.message.trim().length ? '' : ' disabled') }
-                        onClick={ this.onMessageSend }
-                    >
-                        Post Message
-                    </div>
-                </div>
-            </div>
-        );
+    down() {
+        const canvas = document.getElementById('theCanvas');
+        if (canvas.style.width !== "" && canvas.style.width !== "900px") {
+            canvas.style.width = parseInt(canvas.style.width, 10) - 300 + "px"
+            canvas.style.height = parseInt(canvas.style.height, 10) - 300 + "px"
+        }
     }
 
     render() {
-        const {
-            recent,
-            featured
-        } = this.state.messages;
-
-        const messages = Object.entries(recent).sort((a, b) => b[1].timestamp - a[1].timestamp).map(([ messageID, message ]) => (
-            <Message
-                message={ message }
-                featured={ featured.includes(+messageID) }
-                key={ messageID }
-                messageID={ messageID }
-                tippable={ message.owner !== Utils.tronWeb.defaultAddress.base58 }
-                requiresTronLink={ !this.state.tronWeb.installed }
-                onTip={ this.onMessageTip } />
-        ));
-
         return (
-            <div className='kontainer'>
-                <div className='header white'>
-                    <p>
-                        <strong>Tron Message Board</strong> is a DApp which allows you to post messages
-                        along with tipping others or receiving tips. There is no additional cost associated
-                        when tipping people, however you do have to pay network fees.<br/><br/>
-
-                        Want to build your own DApp? The code to this demo is available on&nbsp;
-                        <a href='https://github.com/TronWatch/TronLink-Demo-Messages/' target='_blank' rel='noopener noreferrer'>
-                            GitHub
-                        </a>.
-                    </p>
-                </div>
-
-                { this.renderMessageInput() }
-
-                <div className='header'>
-                    <h1>Featured</h1>
-                    <span>The top 20 messages, sorted by the total tips</span>
-                </div>
-                <Featured
-                    recent={ recent }
-                    featured={ featured }
-                    currentAddress={ Utils.tronWeb && Utils.tronWeb.defaultAddress.base58 }
-                    tronLinkInstalled={ this.state.tronWeb.installed }
-                    onTip={ this.onMessageTip } />
-
-                <div className='header'>
-                    <h1>Recent</h1>
-                    <span>Click any message to send the user a tip</span>
-                </div>
-                <div className='messages'>
-                    { messages }
+            <div>
+                <Header />
+                <div id='pixel-canvas'>
+                    <div className='controls-content left-controls'>
+                        <LeftControls 
+                            row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors }  drawColor={ this.drawColor }
+                            updateColor={ this.updateSelectColor } clear={ this.clear } previous={ this.previous } toggle={ this.toggle } close={ this.close } erase={ this.erase } moveCanvas= { this.moveCanvas }
+                            />
+                    </div>
+                    <Canvas close={ this.close } up={ this.up } down={ this.down } />
+                    <div className='controls-content right-controls'>
+                        <RightControls 
+                            row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } tronWeb={ this.state.tronWeb }
+                            buyPixels= { this.buyPixels } userTotalSales={ this.state.userTotalSales } pendingWithdrawal={ this.state.pendingWithdrawal } withdraw={ this.withdraw } toggle={ this.toggle } clear={ this.clear }
+                        />
+                    </div>
                 </div>
             </div>
         );

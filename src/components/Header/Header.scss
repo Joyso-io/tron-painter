@@ -1,0 +1,40 @@
+header {
+  height: 50px;
+  background-color: #2B2B2B;
+
+  .group-2 {
+    margin: 0 auto;
+    width: 139px;
+    display: flex;
+    top: 12px;
+    position: relative;
+
+    .path-0 { 
+      height: 26px;
+      width: 27px;
+      margin-right: 8px;
+      background: #DADADA;
+      position: relative;
+
+      .path-1 {  
+        height: 9px;
+        width: 9px;
+        display: inline-block;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(-45deg, transparent 49.5%, #DADADA 49.5%, #DADADA 50.5%, transparent 60%);
+        background-color: #2B2B2B;
+      }
+    }
+
+    .pixel-painter {
+      height: 23px;
+      width: 105px;
+      color: #DADADA;
+      font-family: "Bodoni 72";
+      font-size: 20px;
+      font-weight: bold;
+    }
+  }
+}

@@ -1,10 +1,16 @@
 module.exports = {
+  solc: {
+    optimizer: {
+      enabled: true,
+      runs: 200
+    }
+  },
   networks: {
     development: {
 // For trontools/quickstart docker image
       privateKey: '',
       consume_user_resource_percent: 30,
-      fee_limit: 100000000,
+      fee_limit: 1000000000,
       fullNode: "http://127.0.0.1:8090",
       solidityNode: "http://127.0.0.1:8091",
       eventServer: "http://127.0.0.1:8092",
@@ -13,7 +19,7 @@ module.exports = {
     shasta: {
       privateKey: '',
       consume_user_resource_percent: 30,
-      fee_limit: 100000000,
+      fee_limit: 1000000000,
       fullNode: "https://api.shasta.trongrid.io",
       solidityNode: "https://api.shasta.trongrid.io",
       eventServer: "https://api.shasta.trongrid.io",
@@ -24,7 +30,7 @@ module.exports = {
 // PK=da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0 tronbox migrate --network mainnet
       privateKey: process.env.PK,
       consume_user_resource_percent: 30,
-      fee_limit: 100000000,
+      fee_limit: 1000000000,
       fullNode: "https://api.trongrid.io",
       solidityNode: "https://api.trongrid.io",
       eventServer: "https://api.trongrid.io",

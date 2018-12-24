@@ -1,0 +1,144 @@
+.controls-content.left-controls {
+ margin-right: 15px;
+}
+
+.controls-content {
+  height: 900px;
+  background: #F0F0F0;
+
+  .controls {
+    position: relative;
+    width: 50px;
+    background-color: #2B2B2B;
+
+    .tools {
+      > a {
+        display: block;
+        height: 50px;
+        background-repeat: no-repeat;
+
+        &:hover {
+          background-color: #0D0D0D;
+        }
+
+        &.colors {
+          background-image: url('/images/pencil.svg');
+          background-position: 15.5px 15px;
+        }
+
+        &.eraser {
+          background-image: url('/images/eraser.svg');
+          background-position: 15.5px 16.5px;
+        }
+
+        &.previous {
+          background-image: url('/images/previous.svg');
+          background-position: 15px 15.5px;
+        }
+
+        &.move {
+          background-image: url('/images/move.svg');
+          background-position: 15px 15px;
+        }
+
+        &.snapshot {
+          background-image: url('/images/snapshot.svg');
+          background-position: 16px 16px;
+        }
+
+        &.trash {
+          background-image: url('/images/trash.svg');
+          background-position: 15.5px 15px;
+        }
+      }
+
+      #colors {
+        position: absolute;
+        top: 0;
+        background: #2B2B2B;
+        padding: 0;
+        text-align: center;
+        transition: transform .3s ease-in-out;
+        transform: translateX(0px);
+        z-index: -1;
+
+        &.is-visible {
+          z-index: 100;
+          transform: translateX(47px);
+        }
+
+        li {
+          width: 24px;
+          height: 24px;
+          margin: 4px 3px;
+          list-style: none;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
+
+.color-0 {
+  background: #fff;
+}
+
+.color-1 {
+  background: #e4e4e4;
+}
+
+.color-2 {
+  background: #888;
+}
+
+.color-3 {
+  background: #222;
+}
+
+.color-4 {
+  background: #ffa7d1;
+}
+
+.color-5 {
+  background: #e50000;
+}
+
+.color-6 {
+  background: #e59500;
+}
+
+.color-7 {
+  background: #a06a42;
+}
+
+.color-8 {
+  background: #e5d900;
+}
+
+.color-9 {
+  background: #94e044;
+}
+
+.color-10 {
+  background: #02be01;
+}
+
+.color-11 {
+  background: #00d3dd;
+}
+
+.color-12 {
+  background: #0083c7;
+}
+
+.color-13 {
+  background: #0000ea;
+}
+
+.color-14 {
+  background: #cf6ee4;
+}
+
+.color-15 {
+  background: #820080;
+}

@@ -1,0 +1,137 @@
+#cart {
+  position: absolute;
+  top: 0;
+  width: 180px;
+  background-color: #2B2B2B;
+  transition: transform .3s ease-in-out;
+  transform: translateX(-130px);
+  z-index: -1;
+  border-left: 1px solid #fff;
+
+  &.is-visible {
+    z-index: 100;
+    transform: translateX(-188px);
+  }
+
+  .pixels-information {
+    border-bottom: 1px solid #fff;
+    padding: 18px 8px 10px 10px;
+  }
+
+  .pixels {
+    overflow: hidden;
+    color: #DADADA;
+    font-family: "Helvetica Neue";
+    font-weight: bold;
+
+    .title, .clear {
+      float: left;
+      color: #DADADA;
+      font-family: "Helvetica Neue";
+    }
+
+    .content, .buy {
+      float: right;
+    }
+  }
+
+  .pixel-count {
+    margin-bottom: 5px;
+
+    .title {
+      width: 26px;
+      font-size: 11px;
+    }
+
+    .content {
+      font-size: 11px;
+    }
+  }
+
+  .total-price {
+    margin-bottom: 10px;
+
+    .title {
+      font-size: 11px;
+    }
+
+    .content {
+      font-size: 11px;
+    }
+  }
+
+  .pixel-controls {
+    .clear {
+      width: 14.5px;
+      height: 18px;
+      background-image: url('/images/trash.svg');
+      background-size: 14.5px;
+      background-repeat: no-repeat;
+      background-position: 0 2.5px;
+    }
+
+    .buy {
+      border: 0;
+      width: 60px;
+      border-radius: 9px;
+      background-color: #FA2A45;
+      padding: 0;
+      color: #FFFFFF;
+      font-size: 11px;
+
+      &.disable {
+        display: none;
+      }
+    }
+  }
+
+
+  .pixel-items {
+    padding: 8px 8px 11px 10px;
+    font-size: 13px;
+    color: #FFFFFF;
+
+    .pixel-title {
+      margin-bottom: 3px;
+
+      .title {
+        font-size: 11px;
+      }
+
+      .content {
+        font-size: 11px;
+      }
+    }
+
+    .pixels-content {
+      overflow-y: scroll;
+      height: 200px;
+
+      .pixel {
+        overflow: hidden;
+        list-style: none;
+        font-size: 13px;
+        line-height: 20px;
+
+        .color {
+          float: left;
+          width: 7px;
+          height: 7px;
+          position: relative;
+          top: 6.5px;
+          margin-right: 5px;
+        }
+
+        .coordinate {
+          float: left;
+          width: 65px;
+          display: inline-block;
+        }
+
+        .pixel-price {
+          float: right;
+        }
+      }
+    }
+  }
+}
