@@ -6,17 +6,15 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import './Wallet.scss';
 
 class Wallet extends React.Component {
-    state = {
-       colorsActive: false
-    }
-
     constructor(props) {
         super(props);
     }
 
     render() {
-        if(window.tronweb) {
-            const address = Utils.tronweb.defaultAddress.base58;
+        console.log(this.props.tronWeb)
+        if(this.props.tronWeb.loggedIn) {
+            const address = this.props.tronWeb.userAddress;
+            const balance = this.props.tronWeb.balance;
             return (
                 <div id="wallet">
                     <div className='user-address'>
@@ -28,7 +26,7 @@ class Wallet extends React.Component {
                             Balance:
                         </div>  
                         <div className='user-balance'>
-                            12,000
+                            { balance }
                         </div>                                                
                     </div>
                 </div>

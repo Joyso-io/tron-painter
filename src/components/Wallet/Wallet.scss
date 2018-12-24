@@ -47,6 +47,8 @@
     font-size: 12px;
     font-weight: 500;
     margin-bottom: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .balance {

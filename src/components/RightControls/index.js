@@ -27,8 +27,7 @@ class RightControls extends React.Component {
             <div className="controls">
                 <div className="tools">
                     <a className="wallet" onClick={ this.props.toggle }></a>
-                    <Wallet />
-                    <a className="ranking-btn"></a>
+                    <Wallet tronWeb={ this.props.tronWeb }/>
                     <a className="cart" onClick={ this.props.toggle } ></a>
                     <Cart row={ this.props.row } col={ this.props.col } color={ this.props.color } pixelPrices={ this.props.pixelPrices } buy={ this.buy } clear={ this.props.clear } />
                     <a className="income" onClick={ this.props.toggle } ></a>

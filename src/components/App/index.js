@@ -18,7 +18,9 @@ class App extends React.Component {
     state = {
         tronWeb: {
             installed: false,
-            loggedIn: false
+            loggedIn: false,
+            userAddress: null,
+            balance: 0
         },
         row: [],
         col: [],
@@ -143,12 +145,17 @@ class App extends React.Component {
                 this.userTotalSales(window.tronWeb.defaultAddress.hex);
                 if(this.state.tronWeb.loggedIn)
                     return;
+                
+                const address = window.tronWeb.defaultAddress.base58;
+                let balance = await window.tronWeb.trx.getBalance(address);
+                balance = balance / 1000000;
 
-                this.setState({
+                await this.setState({
                     tronWeb: {
                         installed: true,
                         loggedIn: true,
-                        address: window.tronWeb.defaultAddress.hex
+                        userAddress: address,
+                        balance: balance
                     }
                 });
             });
@@ -465,8 +472,10 @@ class App extends React.Component {
                     </div>
                     <Canvas close={ this.close } up={ this.up } down={ this.down } />
                     <div className='controls-content right-controls'>
-                        <RightControls row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } 
-                                       buyPixels= { this.buyPixels } userTotalSales={ this.state.userTotalSales } pendingWithdrawal={ this.state.pendingWithdrawal } withdraw={ this.withdraw } toggle={ this.toggle } clear={ this.clear } />
+                        <RightControls 
+                            row={ this.state.row } col={ this.state.col } color={ this.state.color } pixelPrices={ this.state.pixelPrices } colors={ this.state.colors } tronWeb={ this.state.tronWeb }
+                            buyPixels= { this.buyPixels } userTotalSales={ this.state.userTotalSales } pendingWithdrawal={ this.state.pendingWithdrawal } withdraw={ this.withdraw } toggle={ this.toggle } clear={ this.clear }
+                        />
                     </div>
                 </div>
             </div>
