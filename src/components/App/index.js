@@ -32,6 +32,7 @@ class App extends React.Component {
         isMaxCount: false,
         canvasStatus: null,
         selectPixels: [],
+        clearPixels: [],
         colors: {
             0: '#fff',
             1: '#e4e4e4',
@@ -210,43 +211,35 @@ class App extends React.Component {
         theCanvas.onmousedown = (e) => {
             const rowArray = [];
             const colArray = [];
-            if (this.state.currentColor || this.state.canvasStatus === 0 || this.state.canvasStatus === 1) {
-                isAllowDrawLine = true
+            isAllowDrawLine = true
+
+            if (this.state.canvasStatus === 0) {
+                let { row, col } = this.windowToCanvas(e)
+
+                theCanvas.onmousemove = async (e) => {
+                    const { row, col } = this.windowToCanvas(e)
+                    let intersection = this.pathExists(row, col, this.state.row, this.state.col);
+                    if (isAllowDrawLine && intersection.length > 0) {
+                        this.clear(row, col, intersection[0]);
+                    }
+                }
+            } else if (this.state.canvasStatus === 1) {
+                const rowArray = [];
+                const colArray = [];
                 let { row, col } = this.windowToCanvas(e)
                 let colorInt = Object.keys(this.state.colors).find(key => this.state.colors[key] === this.state.currentColor);
-                let rowInt = row;
-                let colInt = col;
-                if (this.state.canvasStatus === 1) {
-                    this.updatePixelState(row, col, colorInt, canvas, rect);
-                }
+                this.updatePixelState(row, col, colorInt, canvas, rect);
+
                 theCanvas.onmousemove = async (e) => {
                     const { row, col } = this.windowToCanvas(e)
                     let intersection = this.pathExists(row, col, rowArray, colArray);
-                    if (isAllowDrawLine && intersection < 1 && !(rowInt === row && colInt === col)) {
+                    if (isAllowDrawLine && intersection < 1) {
                         rowArray.push(row);
                         colArray.push(col);
-                        if (this.state.canvasStatus === 1) {
-                            this.updatePixelState(row, col, colorInt, canvas, rect);
-                        } else {
-                            let intersection = this.pathExists(row, col, this.state.row, this.state.col);
-
-                            if (intersection.length > 0) {
-                                await this.clear(row, col, intersection[0]);
-
-                                [this.state.row, this.state.col, this.state.color, this.state.pixelPrices, this.state.selectPixels].forEach((e) => {
-                                    e.splice(intersection[0], 1);
-                                })
-
-                                this.setState({ 
-                                    row: this.state.row, col: this.state.col, color: this.state.color, 
-                                    pixelPrices: this.state.pixelPrices, selectPixels: this.state.selectPixels, isMaxCount: false 
-                                })
-                            }
-                        }
+                        this.updatePixelState(row, col, colorInt, canvas, rect);
                     }
                 }
             } else if (this.state.canvasStatus === 2) {
-                isAllowDrawLine = true;
                 var e = e || window.event;
                 var diffX = e.clientX - theCanvas.offsetLeft;
                 var diffY = e.clientY - theCanvas.offsetTop;
@@ -273,8 +266,22 @@ class App extends React.Component {
             }
         }
         theCanvas.onmouseup = async (e) => {
-            if (this.draw) {
-                isAllowDrawLine = false
+            isAllowDrawLine = false
+
+            if (this.state.canvasStatus === 0 && this.state.clearPixels.length > 0) {
+                let pixels = Array.from( new Set(this.state.clearPixels) ).sort((a, b) => a - b);
+
+                for (var i = pixels.length - 1; i >= 0; i--) {
+                   [this.state.row, this.state.col, this.state.color, this.state.pixelPrices, this.state.selectPixels].forEach((e) => {
+                        e.splice(pixels[i], 1);
+                    })
+                }
+
+                this.setState({ 
+                    row: this.state.row, col: this.state.col, color: this.state.color, pixelPrices: this.state.pixelPrices,
+                    selectPixels: this.state.selectPixels, isMaxCount: false, clearPixels: []
+                })
+            } else if (this.state.canvasStatus === 1) {
                 let selectPixelPrices = await Utils.contract.getPixelPrices(this.state.row, this.state.col).call();
                 let pixelPrices = selectPixelPrices.map(function(item) { return (parseInt(item._hex, 16) / 1000000) });
                 this.setState({ pixelPrices: pixelPrices });
@@ -377,6 +384,8 @@ class App extends React.Component {
                     }).catch(err => {
                         console.log(err);
                     });
+
+            this.setState({ clearPixels: this.state.clearPixels.concat(inputIndex) });
         }
     }
 
